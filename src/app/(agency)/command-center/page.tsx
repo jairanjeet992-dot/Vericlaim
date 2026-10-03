@@ -220,12 +220,12 @@ function CommandCenterContent() {
   return (
     <div className="space-y-4">
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
             Back Office Command Center
           </h1>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
             Real-time pipeline orchestration, multi-investigator workload, and SLA telemetry
           </p>
         </div>
@@ -240,7 +240,7 @@ function CommandCenterContent() {
                 if (sf) applySavedFilter(sf);
               }}
               defaultValue=""
-              className="text-xs border border-slate-300 rounded px-2.5 py-1.5 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="text-xs border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="" disabled>Saved Presets ({savedFilters.length})</option>
               {savedFilters.map((sf) => (
@@ -251,14 +251,14 @@ function CommandCenterContent() {
 
           <button
             onClick={() => setShowSaveFilterModal(true)}
-            className="text-xs px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 rounded text-slate-700 font-medium shadow-sm transition"
+            className="text-xs px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 font-medium shadow-sm transition"
           >
-            Save Current Filter
+            Save Filter
           </button>
 
           <Link
             href="/cases"
-            className="text-xs px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded font-medium shadow-sm transition"
+            className="btn-3d text-xs px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-sm transition"
           >
             Intake Docket
           </Link>
@@ -278,32 +278,32 @@ function CommandCenterContent() {
               }}
               className={`p-2.5 rounded-xl text-left transition-all flex flex-col justify-between ${
                 isSelected
-                  ? 'border-2 border-blue-600 bg-gradient-to-b from-blue-50 to-blue-100/60 shadow-md shadow-blue-500/10 ring-2 ring-blue-500/20 translate-y-[-2px]'
-                  : 'kpi-card-3d hover:translate-y-[-2px]'
+                  ? 'border-2 border-blue-600 bg-gradient-to-b from-blue-50 to-blue-100/60 dark:from-blue-950/80 dark:to-blue-900/40 shadow-md shadow-blue-500/10 ring-2 ring-blue-500/20 translate-y-[-2px]'
+                  : 'glass-kpi-3d hover:translate-y-[-2px]'
               }`}
             >
               <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-[10px] font-extrabold tracking-wider text-slate-500 uppercase truncate">
+                <span className="text-[10px] font-extrabold tracking-wider text-slate-500 dark:text-slate-400 uppercase truncate">
                   {tile.label}
                 </span>
                 {tile.key === 'SLA_BREACHED' && tile.count > 0 ? (
-                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse ring-2 ring-rose-200" />
+                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse ring-2 ring-rose-200 dark:ring-rose-900" />
                 ) : null}
               </div>
               <div className="flex items-baseline justify-between mt-1">
                 <span
                   className={`text-lg font-black font-mono-code ${
                     tile.key === 'SLA_BREACHED' && tile.count > 0
-                      ? 'text-rose-600'
+                      ? 'text-rose-600 dark:text-rose-400'
                       : isSelected
-                      ? 'text-blue-900'
-                      : 'text-slate-900'
+                      ? 'text-blue-900 dark:text-blue-300'
+                      : 'text-slate-900 dark:text-white'
                   }`}
                 >
                   {tile.count}
                 </span>
                 {isSelected && (
-                  <span className="text-[9px] font-extrabold text-blue-600 uppercase bg-blue-100 px-1 py-0.2 rounded">
+                  <span className="text-[9px] font-extrabold text-blue-600 dark:text-blue-400 uppercase bg-blue-100 dark:bg-blue-950/80 px-1 py-0.2 rounded border border-blue-200 dark:border-blue-800">
                     Active
                   </span>
                 )}
@@ -314,16 +314,16 @@ function CommandCenterContent() {
       </div>
 
       {/* FILTER & SEARCH CONTROL BAR */}
-      <div className="p-3 bg-white border border-slate-200 rounded shadow-sm space-y-3">
+      <div className="p-3 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-xl shadow-sm space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
           <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Search Docket</label>
+            <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Search Docket</label>
             <input
               type="text"
               placeholder="Claim, Policy, Insured..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
+              className="w-full text-xs px-2.5 py-1.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none"
             />
           </div>
 
@@ -447,10 +447,10 @@ function CommandCenterContent() {
       </div>
 
       {/* DENSE CASES TABLE */}
-      <div className="bg-white border border-slate-200 rounded shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200 select-none">
+            <thead className="bg-slate-100/80 dark:bg-slate-950/90 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-white/10 select-none">
               <tr>
                 <th className="p-2.5 w-8">
                   <input
@@ -492,7 +492,7 @@ function CommandCenterContent() {
                   return (
                     <tr
                       key={c.id}
-                      className={`hover:bg-slate-50/80 transition ${isChecked ? 'bg-blue-50/40' : ''}`}
+                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition ${isChecked ? 'bg-blue-50/40 dark:bg-blue-950/40' : ''}`}
                     >
                       <td className="p-2.5">
                         <input
@@ -503,16 +503,16 @@ function CommandCenterContent() {
                           className="rounded border-slate-300 text-blue-600 focus:ring-0"
                         />
                       </td>
-                      <td className="p-2.5 font-mono-code font-bold text-slate-900">
-                        <Link href={`/cases/${c.id}`} className="hover:text-blue-600 hover:underline">
+                      <td className="p-2.5 font-mono-code font-bold text-slate-900 dark:text-white">
+                        <Link href={`/cases/${c.id}`} className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline">
                           {c.doc_code}
                         </Link>
                       </td>
                       <td className="p-2.5">
-                        <div className="font-mono-code font-medium text-slate-800">{c.claim_no}</div>
-                        <div className="text-[10px] text-slate-400 font-mono-code">{c.policy_no}</div>
+                        <div className="font-mono-code font-medium text-slate-800 dark:text-slate-200">{c.claim_no}</div>
+                        <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono-code">{c.policy_no}</div>
                       </td>
-                      <td className="p-2.5 font-medium text-slate-800">
+                      <td className="p-2.5 font-medium text-slate-800 dark:text-slate-200">
                         {c.insured_name}
                       </td>
                       <td className="p-2.5">

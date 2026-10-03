@@ -17,6 +17,7 @@ import {
   Package,
   Plus,
   ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 
 export default async function AgencyDashboardPage() {
@@ -31,8 +32,6 @@ export default async function AgencyDashboardPage() {
     : null;
 
   // Real Database Telemetry for Current Agency
-  const agencyId = context?.agency_id;
-
   // 1. Total Active Cases
   const { count: activeCasesCount } = await supabase
     .from('cases')
@@ -79,352 +78,424 @@ export default async function AgencyDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Top Banner & Status Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-200 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 border-b border-slate-200/80 dark:border-white/10 gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <h1 className="text-2xl font-black tracking-tight text-slate-900">
+          <div className="flex items-center space-x-2.5">
+            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
               Operations Intelligence
             </h1>
-            <span className="text-[10px] font-mono-code font-bold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full border border-blue-200">
-              LIVE CONSOLE
+            <span className="text-[10px] font-mono-code font-bold px-2 py-0.5 bg-blue-100/80 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 rounded-full border border-blue-200/80 dark:border-blue-800/80 flex items-center space-x-1 shadow-2xs">
+              <span className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+              <span>LIVE TELEMETRY</span>
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Agency telemetry for{' '}
-            <span className="font-semibold text-slate-800">
+            <span className="font-semibold text-slate-800 dark:text-slate-200">
               {context?.agency.name}
             </span>{' '}
             (Tenant Code:{' '}
-            <span className="font-mono-code text-blue-600 font-bold">
+            <span className="font-mono-code text-blue-600 dark:text-blue-400 font-bold">
               {context?.agency.code}
             </span>
-            )
+            ) • Indian Insurance Investigation Architecture
           </p>
         </div>
 
-        <div className="flex items-center space-x-2.5">
+        <div className="flex items-center space-x-2">
           <Link
             href="/cases"
-            className="btn-3d flex items-center space-x-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg text-xs font-bold shadow-md shadow-blue-500/10 transition"
+            className="btn-3d flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-blue-500/20 transition"
           >
             <Plus className="h-3.5 w-3.5" />
-            <span>New Intake</span>
+            <span>Intake Case</span>
           </Link>
           <Link
             href="/command-center"
-            className="btn-3d flex items-center space-x-1.5 px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 rounded-lg text-xs font-bold shadow-xs transition"
+            className="btn-3d flex items-center space-x-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-white/10 rounded-xl text-xs font-semibold shadow-2xs transition"
           >
-            <Activity className="h-3.5 w-3.5 text-blue-600" />
+            <Activity className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
             <span>Command Center</span>
           </Link>
         </div>
       </div>
 
-      {/* 3D KPI TACTILE HERO METRIC CARDS */}
+      {/* LUXURY 3D GLASS KPI CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 1: Active Cases */}
-        <Link href="/cases" className="kpi-card-3d p-4 block group">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shadow-inner group-hover:scale-110 transition-transform">
-              <FolderKanban className="h-5 w-5" />
-            </div>
-            <span className="text-[10px] font-mono-code font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded-full border border-blue-200">
-              INVENTORY
+        {/* KPI 1: Active Claims Portfolio */}
+        <div className="glass-kpi-3d ambient-glow-blue p-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Active Claim Docket
             </span>
+            <div className="h-8 w-8 rounded-xl bg-blue-500/10 dark:bg-blue-400/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <FolderKanban className="h-4 w-4" />
+            </div>
           </div>
-
           <div className="mt-3">
-            <div className="text-3xl font-black font-mono-code text-slate-900 tracking-tight">
-              {activeCasesCount ?? 0}
+            <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              {activeCasesCount || 0}
             </div>
-            <div className="text-xs font-semibold text-slate-600 mt-0.5">
-              Active Investigation Cases
-            </div>
-            <div className="flex items-center space-x-1 text-[11px] text-blue-600 font-medium mt-2">
-              <span>View all dockets</span>
-              <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <div className="flex items-center space-x-1.5 mt-1.5">
+              <span className="text-[10px] font-mono-code font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-1.5 py-0.2 rounded border border-blue-200/60 dark:border-blue-800/60">
+                100% AUDITED
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Open in pipeline
+              </span>
             </div>
           </div>
-        </Link>
+          <div className="mt-4 pt-3 border-t border-slate-100/80 dark:border-white/5 flex items-center justify-between text-[11px]">
+            <Link
+              href="/cases"
+              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold inline-flex items-center space-x-1 group"
+            >
+              <span>View Roster</span>
+              <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+            <span className="text-slate-400 font-mono-code text-[10px]">Scope-Guarded</span>
+          </div>
+        </div>
 
-        {/* KPI 2: Field Inquiries */}
-        <Link href="/investigator" className="kpi-card-3d p-4 block group">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 shadow-inner group-hover:scale-110 transition-transform">
-              <Activity className="h-5 w-5" />
-            </div>
-            <span className="text-[10px] font-mono-code font-bold px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200">
-              FIELD LIVE
+        {/* KPI 2: Live Field Enquiries */}
+        <div className="glass-kpi-3d ambient-glow-emerald p-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+              Field Enquiries Live
             </span>
+            <div className="h-8 w-8 rounded-xl bg-emerald-500/10 dark:bg-emerald-400/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+              <Activity className="h-4 w-4" />
+            </div>
           </div>
-
           <div className="mt-3">
-            <div className="text-3xl font-black font-mono-code text-slate-900 tracking-tight">
-              {activeActivitiesCount ?? 0}
+            <div className="text-3xl font-black text-emerald-700 dark:text-emerald-300 tracking-tight">
+              {activeActivitiesCount || 0}
             </div>
-            <div className="text-xs font-semibold text-slate-600 mt-0.5">
-              Field Enquiries in Progress
-            </div>
-            <div className="flex items-center space-x-1 text-[11px] text-emerald-600 font-medium mt-2">
-              <span>Investigator PWA portal</span>
-              <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <div className="flex items-center space-x-1.5 mt-1.5">
+              <span className="text-[10px] font-mono-code font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-200/60 dark:border-emerald-800/60">
+                GPS + SHA-256
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                PWA field sync
+              </span>
             </div>
           </div>
-        </Link>
+          <div className="mt-4 pt-3 border-t border-slate-100/80 dark:border-white/5 flex items-center justify-between text-[11px]">
+            <Link
+              href="/investigator"
+              className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-semibold inline-flex items-center space-x-1 group"
+            >
+              <span>Field Terminal</span>
+              <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+            <span className="text-slate-400 font-mono-code text-[10px]">Offline Queue</span>
+          </div>
+        </div>
 
-        {/* KPI 3: Quality Reviews & Reworks */}
-        <Link href="/reports" className="kpi-card-3d p-4 block group">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shadow-inner group-hover:scale-110 transition-transform">
-              <FileCheck2 className="h-5 w-5" />
-            </div>
-            <span className="text-[10px] font-mono-code font-bold px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full border border-amber-200">
-              QC REVIEW
+        {/* KPI 3: Quality Control & QC Review */}
+        <div className="glass-kpi-3d ambient-glow-purple p-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">
+              QC Review Queue
             </span>
+            <div className="h-8 w-8 rounded-xl bg-purple-500/10 dark:bg-purple-400/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <FileCheck2 className="h-4 w-4" />
+            </div>
           </div>
-
           <div className="mt-3">
-            <div className="text-3xl font-black font-mono-code text-slate-900 tracking-tight">
-              {reviewReportsCount ?? 0}
+            <div className="text-3xl font-black text-purple-700 dark:text-purple-300 tracking-tight">
+              {reviewReportsCount || 0}
             </div>
-            <div className="text-xs font-semibold text-slate-600 mt-0.5">
-              Reports Awaiting Approval
-            </div>
-            <div className="flex items-center space-x-1 text-[11px] text-amber-700 font-medium mt-2">
-              <span>Quality control queue</span>
-              <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <div className="flex items-center space-x-1.5 mt-1.5">
+              <span className="text-[10px] font-mono-code font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/60 px-1.5 py-0.2 rounded border border-purple-200/60 dark:border-purple-800/60">
+                REWORK ENGINE
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                Dockets pending QC
+              </span>
             </div>
           </div>
-        </Link>
+          <div className="mt-4 pt-3 border-t border-slate-100/80 dark:border-white/5 flex items-center justify-between text-[11px]">
+            <Link
+              href="/reports"
+              className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold inline-flex items-center space-x-1 group"
+            >
+              <span>Review Reports</span>
+              <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+            <span className="text-slate-400 font-mono-code text-[10px]">Immutable Gate</span>
+          </div>
+        </div>
 
-        {/* KPI 4: Financial Volume (Phase 7A) */}
-        <Link href="/invoicing" className="kpi-card-3d p-4 block group">
-          <div className="flex items-start justify-between">
-            <div className="h-10 w-10 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-600 shadow-inner group-hover:scale-110 transition-transform">
-              <Receipt className="h-5 w-5" />
-            </div>
-            <span className="text-[10px] font-mono-code font-bold px-2 py-0.5 bg-purple-50 text-purple-700 rounded-full border border-purple-200">
-              GST INVOICING
+        {/* KPI 4: Net Invoiced Revenue */}
+        <div className="glass-kpi-3d ambient-glow-amber p-5 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+              Net Invoiced Revenue
             </span>
+            <div className="h-8 w-8 rounded-xl bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <Receipt className="h-4 w-4" />
+            </div>
           </div>
-
           <div className="mt-3">
-            <div className="text-3xl font-black font-mono-code text-slate-900 tracking-tight truncate">
+            <div className="text-2xl font-black text-amber-700 dark:text-amber-300 tracking-tight">
               {formatCurrency(totalBilled)}
             </div>
-            <div className="text-xs font-semibold text-slate-600 mt-0.5">
-              Total Invoiced Revenue
-            </div>
-            <div className="flex items-center space-x-1 text-[11px] text-purple-700 font-medium mt-2">
-              <span>View tax ledger & bills</span>
-              <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <div className="flex items-center space-x-1.5 mt-1.5">
+              <span className="text-[10px] font-mono-code font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.2 rounded border border-amber-200/60 dark:border-amber-800/60">
+                GST / SAC 998311
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                FY 2026-27 Monotonic
+              </span>
             </div>
           </div>
-        </Link>
+          <div className="mt-4 pt-3 border-t border-slate-100/80 dark:border-white/5 flex items-center justify-between text-[11px]">
+            <Link
+              href="/invoicing"
+              className="text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-semibold inline-flex items-center space-x-1 group"
+            >
+              <span>Finance Console</span>
+              <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+            <span className="text-slate-400 font-mono-code text-[10px]">CA-VERIFY</span>
+          </div>
+        </div>
       </div>
 
-      {/* OPERATIONS LIFECYCLE 3D PIPELINE */}
-      <div className="kpi-card-3d p-5">
+      {/* OPERATIONAL LIFECYCLE PIPELINE */}
+      <div className="glass-kpi-3d p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800">
-              Investigation Operations Lifecycle
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+              End-to-End Investigation Lifecycle
             </h2>
-            <p className="text-[11px] text-slate-500">
-              Standard operating procedure from intake to financial recovery
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Deterministic state machine enforced by Postgres RLS triggers (Rule A1 & A6)
             </p>
           </div>
-          <span className="text-[10px] font-mono-code text-slate-400 font-medium">
-            Rule A1 Flow
+          <span className="text-[10px] font-mono-code px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded font-semibold border border-slate-200 dark:border-slate-700">
+            6 STAGES
           </span>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-center text-xs">
-          <div className="p-3 rounded-lg bg-blue-50/70 border border-blue-200/80">
-            <div className="font-bold text-blue-900 text-xs">1. Case Intake</div>
-            <div className="text-[10px] text-blue-700 mt-0.5">Registration</div>
-          </div>
-          <div className="p-3 rounded-lg bg-indigo-50/70 border border-indigo-200/80">
-            <div className="font-bold text-indigo-900 text-xs">2. Verification</div>
-            <div className="text-[10px] text-indigo-700 mt-0.5">Manager Routing</div>
-          </div>
-          <div className="p-3 rounded-lg bg-emerald-50/70 border border-emerald-200/80">
-            <div className="font-bold text-emerald-900 text-xs">3. Field Inquiry</div>
-            <div className="text-[10px] text-emerald-700 mt-0.5">Evidence & PWA</div>
-          </div>
-          <div className="p-3 rounded-lg bg-amber-50/70 border border-amber-200/80">
-            <div className="font-bold text-amber-900 text-xs">4. Report QC</div>
-            <div className="text-[10px] text-amber-700 mt-0.5">Rework Cycles</div>
-          </div>
-          <div className="p-3 rounded-lg bg-cyan-50/70 border border-cyan-200/80">
-            <div className="font-bold text-cyan-900 text-xs">5. Hardcopy</div>
-            <div className="text-[10px] text-cyan-700 mt-0.5">Courier AWB</div>
-          </div>
-          <div className="p-3 rounded-lg bg-purple-50/70 border border-purple-200/80">
-            <div className="font-bold text-purple-900 text-xs">6. GST Billing</div>
-            <div className="text-[10px] text-purple-700 mt-0.5">Gapless Invoice</div>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[
+            { step: '01', title: 'Case Intake', desc: 'Data entry & OCR check', color: 'border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/30' },
+            { step: '02', title: 'Verification', desc: 'Scope & claim routing', color: 'border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30' },
+            { step: '03', title: 'Field Enquiries', desc: 'PWA evidence with hash', color: 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-950/30' },
+            { step: '04', title: 'Review & QC', desc: 'Rework cycle engine', color: 'border-purple-500/30 text-purple-600 dark:text-purple-400 bg-purple-50/50 dark:bg-purple-950/30' },
+            { step: '05', title: 'Hardcopy Track', desc: 'AWB courier chain', color: 'border-teal-500/30 text-teal-600 dark:text-teal-400 bg-teal-50/50 dark:bg-teal-950/30' },
+            { step: '06', title: 'GST Billing', desc: 'Gapless tax invoices', color: 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-50/50 dark:bg-amber-950/30' },
+          ].map((stage, idx) => (
+            <div
+              key={idx}
+              className={`p-3 rounded-xl border ${stage.color} flex flex-col justify-between transition-transform hover:-translate-y-0.5`}
+            >
+              <div className="flex items-center justify-between text-[10px] font-mono-code font-bold opacity-80">
+                <span>{stage.step}</span>
+                <span>•</span>
+              </div>
+              <div className="my-2">
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-tight">
+                  {stage.title}
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">
+                  {stage.desc}
+                </div>
+              </div>
+              <div className="text-[9px] font-mono-code uppercase opacity-75 font-semibold">
+                Traceable
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* TWO COLUMN GRID: RECENT DOCKETS & QUICK LAUNCH */}
+      {/* RECENT CLAIM DOCKETS TABLE & LAUNCHPAD */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Recent Active Cases Ledger */}
-        <div className="lg:col-span-2 kpi-card-3d p-5">
-          <div className="flex items-center justify-between mb-3.5">
+        {/* Left 2 Cols: Recent Cases Roster */}
+        <div className="lg:col-span-2 glass-kpi-3d p-5">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xs font-black uppercase tracking-wider text-slate-800">
-                Recent Investigation Dockets
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                Recent Claim Dockets
               </h2>
-              <p className="text-[11px] text-slate-500">
-                Latest insurance claims in active pipeline
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Live case stream filtered by your authorized scope ({context?.scope || 'ALL'})
               </p>
             </div>
             <Link
               href="/cases"
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+              className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 inline-flex items-center space-x-1"
             >
-              <span>View all cases</span>
+              <span>All Cases</span>
               <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-white/10">
             <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200 text-[10px] uppercase font-bold text-slate-400">
-                  <th className="pb-2">Docket No</th>
-                  <th className="pb-2">Claim / Insured</th>
-                  <th className="pb-2">Case Type</th>
-                  <th className="pb-2">Risk</th>
-                  <th className="pb-2">Status</th>
-                  <th className="pb-2 text-right">Action</th>
+              <thead className="bg-slate-100/70 dark:bg-slate-900/80 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10px] border-b border-slate-200/80 dark:border-white/10">
+                <tr>
+                  <th className="py-2.5 px-3">Doc Code</th>
+                  <th className="py-2.5 px-3">Insured & Claim</th>
+                  <th className="py-2.5 px-3">Client</th>
+                  <th className="py-2.5 px-3">Risk Level</th>
+                  <th className="py-2.5 px-3">Status</th>
+                  <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {recentCases && recentCases.length > 0 ? (
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                {!recentCases || recentCases.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
+                      No cases registered yet. Click &quot;Intake Case&quot; to begin.
+                    </td>
+                  </tr>
+                ) : (
                   recentCases.map((c: any) => (
-                    <tr key={c.id} className="hover:bg-slate-50/80 transition">
-                      <td className="py-2.5 font-mono-code font-bold text-blue-700">
+                    <tr
+                      key={c.id}
+                      className="hover:bg-slate-50/80 dark:hover:bg-slate-900/60 transition-colors"
+                    >
+                      <td className="py-2.5 px-3 font-mono-code font-bold text-slate-800 dark:text-slate-200">
                         {c.doc_code}
                       </td>
-                      <td className="py-2.5">
-                        <div className="font-semibold text-slate-800">
+                      <td className="py-2.5 px-3">
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">
                           {c.insured_name}
                         </div>
-                        <div className="text-[10px] font-mono-code text-slate-400">
-                          {c.claim_no}
+                        <div className="font-mono-code text-[11px] text-slate-400 dark:text-slate-500">
+                          {c.claim_no || 'Pending Claim #'}
                         </div>
                       </td>
-                      <td className="py-2.5 font-medium text-slate-600">
-                        {c.case_type}
+                      <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400">
+                        {c.clients?.name || 'Insurer'}
                       </td>
-                      <td className="py-2.5">
+                      <td className="py-2.5 px-3">
                         <span
-                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                            c.risk_level === 'HIGH'
-                              ? 'bg-rose-100 text-rose-800'
-                              : c.risk_level === 'MEDIUM'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-emerald-100 text-emerald-800'
+                          className={`text-[10px] font-mono-code font-bold px-1.5 py-0.5 rounded border ${
+                            c.risk_level === 'CRITICAL'
+                              ? 'bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-300/80'
+                              : c.risk_level === 'HIGH'
+                              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-300/80'
+                              : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-300/80'
                           }`}
                         >
-                          {c.risk_level}
+                          {c.risk_level || 'LOW'}
                         </span>
                       </td>
-                      <td className="py-2.5">
-                        <span className="text-[10px] font-mono-code font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                      <td className="py-2.5 px-3">
+                        <span className="text-[10px] font-mono-code bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 font-semibold">
                           {c.status}
                         </span>
                       </td>
-                      <td className="py-2.5 text-right">
+                      <td className="py-2.5 px-3 text-right">
                         <Link
                           href={`/cases/${c.id}`}
-                          className="text-[11px] font-bold text-blue-600 hover:text-blue-800"
+                          className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center space-x-0.5"
                         >
-                          Open →
+                          <span>Open</span>
+                          <ArrowRight className="h-3 w-3" />
                         </Link>
                       </td>
                     </tr>
                   ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="py-6 text-center text-slate-400">
-                      No cases registered yet. Click &ldquo;+ New Intake&rdquo; to begin.
-                    </td>
-                  </tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Right Column: Quick Operations & Governance Vault */}
-        <div className="space-y-4">
-          {/* Quick Launchpad */}
-          <div className="kpi-card-3d p-5">
-            <h2 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-3">
-              Operational Quick Actions
+        {/* Right 1 Col: Quick Action Launchpad */}
+        <div className="glass-kpi-3d p-5 flex flex-col justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+              Operations Launchpad
             </h2>
-            <div className="space-y-2">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              Tactical actions for investigation coordinators
+            </p>
+
+            <div className="space-y-2.5">
               <Link
                 href="/cases"
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-blue-50/70 border border-slate-200 hover:border-blue-300 transition text-xs group"
+                className="group p-3 rounded-xl border border-slate-200/80 dark:border-white/10 hover:border-blue-500/40 bg-white/60 dark:bg-slate-900/60 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 flex items-center justify-between transition-all"
               >
-                <div className="flex items-center space-x-2.5">
-                  <div className="h-7 w-7 rounded-md bg-blue-100 text-blue-700 flex items-center justify-center font-bold">
-                    +
+                <div className="flex items-center space-x-3">
+                  <div className="h-8 w-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                    <Plus className="h-4 w-4" />
                   </div>
-                  <span className="font-semibold text-slate-800">
-                    Register New Case Intake
-                  </span>
+                  <div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                      New Case Intake
+                    </div>
+                    <div className="text-[11px] text-slate-400">OCR & Duplicate Claim Check</div>
+                  </div>
                 </div>
-                <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 transition" />
+                <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+
+              <Link
+                href="/command-center"
+                className="group p-3 rounded-xl border border-slate-200/80 dark:border-white/10 hover:border-indigo-500/40 bg-white/60 dark:bg-slate-900/60 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 flex items-center justify-between transition-all"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="h-8 w-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <Activity className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                      Command Center
+                    </div>
+                    <div className="text-[11px] text-slate-400">13-Queue Telemetry & SLA Hub</div>
+                  </div>
+                </div>
+                <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+
+              <Link
+                href="/reports"
+                className="group p-3 rounded-xl border border-slate-200/80 dark:border-white/10 hover:border-purple-500/40 bg-white/60 dark:bg-slate-900/60 hover:bg-purple-50/50 dark:hover:bg-purple-950/30 flex items-center justify-between transition-all"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className="h-8 w-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                    <FileCheck2 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-purple-600 dark:group-hover:text-purple-400">
+                      Report Review & QC
+                    </div>
+                    <div className="text-[11px] text-slate-400">Multi-cycle Rework Engine</div>
+                  </div>
+                </div>
+                <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all" />
               </Link>
 
               <Link
                 href="/invoicing"
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-amber-50/70 border border-slate-200 hover:border-amber-300 transition text-xs group"
+                className="group p-3 rounded-xl border border-slate-200/80 dark:border-white/10 hover:border-amber-500/40 bg-white/60 dark:bg-slate-900/60 hover:bg-amber-50/50 dark:hover:bg-amber-950/30 flex items-center justify-between transition-all"
               >
-                <div className="flex items-center space-x-2.5">
-                  <div className="h-7 w-7 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-                    ₹
+                <div className="flex items-center space-x-3">
+                  <div className="h-8 w-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                    <Receipt className="h-4 w-4" />
                   </div>
-                  <span className="font-semibold text-slate-800">
-                    Bulk Invoice Generator
-                  </span>
+                  <div>
+                    <div className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                      GST Tax Invoicing
+                    </div>
+                    <div className="text-[11px] text-slate-400">Monotonic FY Sequences</div>
+                  </div>
                 </div>
-                <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-amber-600 transition" />
-              </Link>
-
-              <Link
-                href="/hardcopy"
-                className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 hover:bg-cyan-50/70 border border-slate-200 hover:border-cyan-300 transition text-xs group"
-              >
-                <div className="flex items-center space-x-2.5">
-                  <Package className="h-5 w-5 text-cyan-600" />
-                  <span className="font-semibold text-slate-800">
-                    Dispatch Courier Manifest
-                  </span>
-                </div>
-                <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-cyan-600 transition" />
+                <ArrowRight className="h-3.5 w-3.5 text-slate-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all" />
               </Link>
             </div>
           </div>
 
-          {/* System Security & Compliance Badge */}
-          <div className="kpi-card-3d p-4 bg-gradient-to-br from-slate-900 to-slate-950 text-white border-slate-800">
-            <div className="flex items-center space-x-2 text-xs font-bold text-blue-400">
-              <ShieldCheck className="h-4 w-4" />
-              <span>Security Constitution (A1-A12)</span>
-            </div>
-            <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">
-              Multi-tenant agency isolation active with PostgreSQL RLS. Private Cloudflare R2 evidence vault with SHA-256 verification and immutable audit logs.
-            </p>
-            <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-400 font-mono-code">
-              <span>TENANT: {context?.agency.code}</span>
-              <span className="text-emerald-400 font-bold">COMPLIANT</span>
-            </div>
+          <div className="mt-4 pt-3 border-t border-slate-100/80 dark:border-white/10 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Vericlaim SaaS Core</span>
+            <span className="font-mono-code">v0.1.0-alpha</span>
           </div>
         </div>
       </div>

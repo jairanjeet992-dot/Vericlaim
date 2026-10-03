@@ -71,28 +71,28 @@ export default function AuditVaultPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 dark:border-white/10 pb-4">
         <div>
           <div className="flex items-center space-x-2">
-            <div className="h-7 w-7 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold">
+            <div className="h-7 w-7 rounded-xl bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center font-bold">
               <ShieldCheck className="h-4 w-4 text-emerald-400" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
               Security & Audit Vault
             </h1>
-            <span className="text-[10px] font-mono-code bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold border border-emerald-200">
+            <span className="text-[10px] font-mono-code bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 px-2 py-0.5 rounded-full font-semibold border border-emerald-200 dark:border-emerald-800/80">
               APPEND-ONLY
             </span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Tamper-evident regulatory ledger recording all case mutations, status transitions, role authorizations, and PII accesses.
           </p>
         </div>
 
         <button
-          onClick={loadAuditLogs}
+          onClick={() => loadAuditLogs()}
           disabled={loading}
-          className="btn-3d flex items-center space-x-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-50 self-start md:self-auto"
+          className="btn-3d flex items-center space-x-1.5 px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 self-start md:self-auto shadow-2xs"
         >
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh Vault</span>
@@ -101,63 +101,63 @@ export default function AuditVaultPage() {
 
       {/* 3D KPI Metric Tiles */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="kpi-card-3d bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-[11px] font-semibold uppercase text-slate-500 tracking-wider">
+        <div className="glass-kpi-3d p-4">
+          <div className="text-[11px] font-semibold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
             Total Audited Records
           </div>
-          <div className="text-2xl font-black text-slate-900 mt-1">{logs.length}</div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{logs.length}</div>
           <div className="text-[10px] text-slate-400 mt-0.5 font-mono-code">Recent window</div>
         </div>
 
-        <div className="kpi-card-3d bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-[11px] font-semibold uppercase text-emerald-600 tracking-wider">
+        <div className="glass-kpi-3d ambient-glow-emerald p-4">
+          <div className="text-[11px] font-semibold uppercase text-emerald-600 dark:text-emerald-400 tracking-wider">
             Status & Workflow Events
           </div>
-          <div className="text-2xl font-black text-emerald-700 mt-1">
+          <div className="text-2xl font-black text-emerald-700 dark:text-emerald-300 mt-1">
             {logs.filter((l) => l.action.includes('STATUS') || l.action.includes('WORKFLOW')).length}
           </div>
-          <div className="text-[10px] text-emerald-600/70 mt-0.5">Enforced via RLS triggers</div>
+          <div className="text-[10px] text-emerald-600/70 dark:text-emerald-400/70 mt-0.5">Enforced via RLS triggers</div>
         </div>
 
-        <div className="kpi-card-3d bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-[11px] font-semibold uppercase text-blue-600 tracking-wider">
+        <div className="glass-kpi-3d ambient-glow-blue p-4">
+          <div className="text-[11px] font-semibold uppercase text-blue-600 dark:text-blue-400 tracking-wider">
             Security & Auth Checks
           </div>
-          <div className="text-2xl font-black text-blue-700 mt-1">
+          <div className="text-2xl font-black text-blue-700 dark:text-blue-300 mt-1">
             {logs.filter((l) => l.action.includes('ROLE') || l.action.includes('LOGIN') || l.action.includes('AUTH')).length}
           </div>
-          <div className="text-[10px] text-blue-600/70 mt-0.5">RBAC & scope verification</div>
+          <div className="text-[10px] text-blue-600/70 dark:text-blue-400/70 mt-0.5">RBAC & scope verification</div>
         </div>
 
-        <div className="kpi-card-3d bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="text-[11px] font-semibold uppercase text-purple-600 tracking-wider">
+        <div className="glass-kpi-3d ambient-glow-purple p-4">
+          <div className="text-[11px] font-semibold uppercase text-purple-600 dark:text-purple-400 tracking-wider">
             Integrity Status
           </div>
-          <div className="text-lg font-black text-purple-700 mt-1 flex items-center space-x-1">
+          <div className="text-lg font-black text-purple-700 dark:text-purple-300 mt-1 flex items-center space-x-1">
             <Lock className="h-4 w-4" />
             <span>Verified</span>
           </div>
-          <div className="text-[10px] text-purple-600/70 mt-0.5">Zero deletions permitted</div>
+          <div className="text-[10px] text-purple-600/70 dark:text-purple-400/70 mt-0.5">Zero deletions permitted</div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs flex flex-wrap items-center gap-3">
+      <div className="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200 dark:border-white/10 shadow-2xs flex flex-wrap items-center gap-3">
         <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[240px] relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
           <input
             type="text"
             value={searchAction}
             onChange={(e) => setSearchAction(e.target.value)}
             placeholder="Filter by action code (e.g., CASE_TRANSITION, ROLE_ASSIGN)..."
-            className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-slate-800 focus:bg-white"
+            className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-slate-800 dark:focus:border-blue-500"
           />
         </form>
 
         <select
           value={selectedEntityType}
           onChange={(e) => setSelectedEntityType(e.target.value)}
-          className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:border-slate-800"
+          className="text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-slate-700 dark:text-slate-200 focus:outline-none focus:border-slate-800 dark:focus:border-blue-500"
         >
           <option value="">All Entity Types</option>
           <option value="cases">Cases</option>
@@ -170,16 +170,16 @@ export default function AuditVaultPage() {
       </div>
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg">
+        <div className="p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs rounded-lg">
           {error}
         </div>
       )}
 
       {/* Ledger Table */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900/80 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[10px]">
+            <thead className="bg-slate-50 dark:bg-slate-950/90 border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="py-2.5 px-3">Timestamp (IST)</th>
                 <th className="py-2.5 px-3">Action</th>
@@ -190,7 +190,7 @@ export default function AuditVaultPage() {
                 <th className="py-2.5 px-3 text-right">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="py-8 text-center text-slate-400 text-xs">
@@ -219,34 +219,34 @@ export default function AuditVaultPage() {
 
                   return (
                     <React.Fragment key={log.id}>
-                      <tr className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-2.5 px-3 font-mono-code text-[11px] text-slate-600 whitespace-nowrap">
+                      <tr className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
+                        <td className="py-2.5 px-3 font-mono-code text-[11px] text-slate-600 dark:text-slate-400 whitespace-nowrap">
                           {istTime}
                         </td>
                         <td className="py-2.5 px-3">
-                          <span className="font-mono-code font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded text-[11px] border border-slate-200">
+                          <span className="font-mono-code font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[11px] border border-slate-200 dark:border-slate-700">
                             {log.action}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 font-semibold text-slate-700 capitalize">
+                        <td className="py-2.5 px-3 font-semibold text-slate-700 dark:text-slate-300 capitalize">
                           {log.entity_type}
                         </td>
-                        <td className="py-2.5 px-3 font-mono-code text-[11px] text-slate-600">
+                        <td className="py-2.5 px-3 font-mono-code text-[11px] text-slate-600 dark:text-slate-400">
                           {log.entity_id ? log.entity_id.slice(0, 12) + '...' : '-'}
                         </td>
                         <td className="py-2.5 px-3">
-                          <div className="flex items-center space-x-1 text-slate-700 font-medium">
+                          <div className="flex items-center space-x-1 text-slate-700 dark:text-slate-300 font-medium">
                             <User className="h-3 w-3 text-slate-400" />
                             <span>{log.users?.full_name || log.user_id?.slice(0, 8) || 'System'}</span>
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 font-mono-code text-[11px] text-slate-500">
+                        <td className="py-2.5 px-3 font-mono-code text-[11px] text-slate-500 dark:text-slate-400">
                           {log.ip_address || '127.0.0.1'}
                         </td>
                         <td className="py-2.5 px-3 text-right">
                           <button
                             onClick={() => setExpandedId(isExpanded ? null : log.id)}
-                            className="text-xs font-semibold text-blue-600 hover:text-blue-800 inline-flex items-center space-x-1"
+                            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 inline-flex items-center space-x-1"
                           >
                             <span>{isExpanded ? 'Hide' : 'Inspect'}</span>
                             {isExpanded ? (

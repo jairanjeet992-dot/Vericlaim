@@ -7,6 +7,11 @@
   --background-rgb: 248, 250, 252;
 }
 
+.dark {
+  --foreground-rgb: 241, 245, 249;
+  --background-rgb: 2, 6, 23;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background-color: rgb(var(--background-rgb));
@@ -22,60 +27,143 @@ body {
   letter-spacing: -0.02em;
 }
 
-/* 3D KPI Cards & Tactile Panels */
-.kpi-card-3d {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 0.85rem;
-  box-shadow: 
-    0 1px 2px 0 rgba(15, 23, 42, 0.03),
-    0 4px 6px -1px rgba(15, 23, 42, 0.03),
-    0 10px 15px -3px rgba(15, 23, 42, 0.04),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 0 rgba(15, 23, 42, 0.03);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+/* ========================================================================= */
+/* LUXURY 3D GLASS & TACTILE KPI DESIGN SYSTEM                                */
+/* ========================================================================= */
+
+/* Glass Panel Base */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Luxury 3D Glass KPI Card */
+.glass-kpi-3d {
   position: relative;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 1px 2px 0 rgba(0, 0, 0, 0.02),
+    0 4px 16px -2px rgba(15, 23, 42, 0.06),
+    0 12px 24px -4px rgba(15, 23, 42, 0.04),
+    inset 0 1px 0 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 0 rgba(15, 23, 42, 0.04);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
-.kpi-card-3d:hover {
-  transform: translateY(-2px);
+.glass-kpi-3d::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  pointer-events: none;
+}
+
+.glass-kpi-3d:hover {
+  transform: translateY(-3px);
+  border-color: rgba(59, 130, 246, 0.35);
   box-shadow: 
-    0 12px 20px -5px rgba(15, 23, 42, 0.08),
-    0 8px 10px -6px rgba(15, 23, 42, 0.05),
-    0 0 0 1px rgba(59, 130, 246, 0.25),
+    0 16px 32px -8px rgba(15, 23, 42, 0.12),
+    0 8px 16px -4px rgba(59, 130, 246, 0.08),
     inset 0 1px 0 0 rgba(255, 255, 255, 1);
 }
 
-.kpi-card-3d-dark {
-  background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
-  border: 1px solid rgba(51, 65, 85, 0.7);
-  border-radius: 0.85rem;
+/* Dark Mode 3D Glass KPI Card */
+.dark .glass-kpi-3d {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(2, 6, 23, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.4),
-    0 10px 20px -3px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.5);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
+    0 4px 12px -2px rgba(0, 0, 0, 0.5),
+    0 16px 32px -6px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.6);
 }
 
-.kpi-card-3d-dark:hover {
-  transform: translateY(-2px);
-  border-color: rgba(96, 165, 250, 0.5);
+.dark .glass-kpi-3d::before {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+}
+
+.dark .glass-kpi-3d:hover {
+  transform: translateY(-3px);
+  border-color: rgba(96, 165, 250, 0.4);
   box-shadow: 
-    0 12px 25px -5px rgba(0, 0, 0, 0.6),
-    0 0 15px -3px rgba(59, 130, 246, 0.25),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    0 20px 40px -10px rgba(0, 0, 0, 0.8),
+    0 0 25px -4px rgba(59, 130, 246, 0.25),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Backward compatibility aliases */
+.kpi-card-3d {
+  @apply glass-kpi-3d;
+}
+
+.kpi-card-3d-dark {
+  @apply glass-kpi-3d;
+}
+
+/* Ambient glow accents */
+.ambient-glow-blue {
+  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+}
+
+.dark .ambient-glow-blue {
+  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+}
+
+.ambient-glow-emerald {
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+}
+
+.dark .ambient-glow-emerald {
+  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+}
+
+.ambient-glow-amber {
+  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+}
+
+.dark .ambient-glow-amber {
+  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.25) 0%, transparent 70%);
+}
+
+.ambient-glow-purple {
+  background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+}
+
+.dark .ambient-glow-purple {
+  background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
 }
 
 /* Tactile 3D button */
 .btn-3d {
   box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.25),
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);
   transition: all 0.15s ease;
+}
+
+.btn-3d:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .btn-3d:active {
@@ -96,5 +184,12 @@ body {
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: rgba(148, 163, 184, 0.6);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.5);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
 }

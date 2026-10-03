@@ -183,7 +183,7 @@ export default function CasesPage() {
       )}
 
       {/* Filters Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-white border border-slate-200 rounded">
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-xl">
         <div className="flex items-center space-x-3 flex-1 min-w-[240px]">
           <input
             type="text"
@@ -191,22 +191,22 @@ export default function CasesPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && loadCases()}
-            className="text-xs px-3 py-1.5 border border-slate-300 rounded w-full max-w-sm font-mono-code"
+            className="text-xs px-3 py-1.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 rounded-lg w-full max-w-sm font-mono-code focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
           <button
             onClick={loadCases}
-            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded border border-slate-300"
+            className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-lg border border-slate-300 dark:border-slate-700"
           >
             Search
           </button>
         </div>
 
         <div className="flex items-center space-x-2">
-          <label className="text-[11px] font-semibold text-slate-500 uppercase">Status:</label>
+          <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase">Status:</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs px-2.5 py-1.5 border border-slate-300 rounded bg-white"
+            className="text-xs px-2.5 py-1.5 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-200 focus:outline-none"
           >
             <option value="">All Statuses</option>
             <option value="DATA_ENTRY">Data Entry</option>
@@ -222,9 +222,9 @@ export default function CasesPage() {
       </div>
 
       {/* Cases Table */}
-      <div className="bg-white border border-slate-200 rounded shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
         <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase tracking-wider">
+          <thead className="bg-slate-50 dark:bg-slate-950/90 border-b border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 font-semibold uppercase tracking-wider">
             <tr>
               <th className="px-4 py-3">Doc Code</th>
               <th className="px-4 py-3">Claim / Policy</th>
@@ -237,7 +237,7 @@ export default function CasesPage() {
               <th className="px-4 py-3 text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-700">
+          <tbody className="divide-y divide-slate-100 dark:divide-white/5 text-slate-700 dark:text-slate-300">
             {loading ? (
               <tr>
                 <td colSpan={9} className="px-4 py-8 text-center text-slate-400">
@@ -252,15 +252,15 @@ export default function CasesPage() {
               </tr>
             ) : (
               cases.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50 transition">
-                  <td className="px-4 py-3 font-mono-code font-bold text-blue-700">
+                <tr key={c.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition">
+                  <td className="px-4 py-3 font-mono-code font-bold text-blue-700 dark:text-blue-400">
                     <Link href={`/cases/${c.id}`} className="hover:underline">
                       {c.doc_code}
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="font-mono-code font-semibold text-slate-900">{c.claim_no || c.claim_number}</div>
-                    <div className="font-mono-code text-[10px] text-slate-400">Claim ID</div>
+                    <div className="font-mono-code font-semibold text-slate-900 dark:text-white">{c.claim_no || c.claim_number}</div>
+                    <div className="font-mono-code text-[10px] text-slate-400 dark:text-slate-500">Claim ID</div>
                   </td>
                   <td className="px-4 py-3 font-medium text-slate-800">
                     {c.insured_name || '—'}
