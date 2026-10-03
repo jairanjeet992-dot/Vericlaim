@@ -256,8 +256,8 @@ export default function CommandCenterPage() {
         </div>
       </div>
 
-      {/* 13 OPERATIONAL STATUS TILES */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-13 gap-1.5">
+      {/* 13 OPERATIONAL STATUS TILES - 3D KPI TILES */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-13 gap-2">
         {tiles.map((tile) => {
           const isSelected = selectedTile === tile.key;
           return (
@@ -267,28 +267,36 @@ export default function CommandCenterPage() {
                 setSelectedTile(isSelected ? null : tile.key);
                 setPage(1);
               }}
-              className={`p-2 rounded border text-left transition flex flex-col justify-between ${
+              className={`p-2.5 rounded-xl text-left transition-all flex flex-col justify-between ${
                 isSelected
-                  ? 'border-blue-600 bg-blue-50/80 ring-1 ring-blue-600'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
+                  ? 'border-2 border-blue-600 bg-gradient-to-b from-blue-50 to-blue-100/60 shadow-md shadow-blue-500/10 ring-2 ring-blue-500/20 translate-y-[-2px]'
+                  : 'kpi-card-3d hover:translate-y-[-2px]'
               }`}
             >
               <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase truncate">
+                <span className="text-[10px] font-extrabold tracking-wider text-slate-500 uppercase truncate">
                   {tile.label}
                 </span>
-                {tile.key === 'SLA_BREACHED' && tile.count > 0 && (
-                  <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-                )}
+                {tile.key === 'SLA_BREACHED' && tile.count > 0 ? (
+                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse ring-2 ring-rose-200" />
+                ) : null}
               </div>
-              <div className="flex items-baseline justify-between">
-                <span className={`text-base font-bold font-mono-code ${
-                  tile.key === 'SLA_BREACHED' && tile.count > 0 ? 'text-red-600' : 'text-slate-900'
-                }`}>
+              <div className="flex items-baseline justify-between mt-1">
+                <span
+                  className={`text-lg font-black font-mono-code ${
+                    tile.key === 'SLA_BREACHED' && tile.count > 0
+                      ? 'text-rose-600'
+                      : isSelected
+                      ? 'text-blue-900'
+                      : 'text-slate-900'
+                  }`}
+                >
                   {tile.count}
                 </span>
                 {isSelected && (
-                  <span className="text-[9px] font-bold text-blue-600 uppercase">Active</span>
+                  <span className="text-[9px] font-extrabold text-blue-600 uppercase bg-blue-100 px-1 py-0.2 rounded">
+                    Active
+                  </span>
                 )}
               </div>
             </button>

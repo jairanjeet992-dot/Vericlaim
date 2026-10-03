@@ -244,28 +244,50 @@ export default function InvoicingPage() {
         </div>
       </div>
 
-      {/* Financial Telemetry Banner */}
+      {/* Financial Telemetry Banner - 3D KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded p-4">
-          <div className="text-xs text-slate-500 font-medium uppercase">Total Invoices</div>
-          <div className="text-2xl font-bold text-slate-900 mt-1">{invoices.length}</div>
+        <div className="kpi-card-3d p-4">
+          <div className="text-[11px] text-slate-500 font-extrabold uppercase tracking-wider">
+            Total Invoices
+          </div>
+          <div className="text-2xl font-black text-slate-900 mt-1 font-mono-code">
+            {invoices.length}
+          </div>
+          <div className="text-[11px] text-slate-400 mt-1">
+            Dockets & bills in ledger
+          </div>
         </div>
-        <div className="bg-white border border-slate-200 rounded p-4">
-          <div className="text-xs text-slate-500 font-medium uppercase">Taxable Value</div>
-          <div className="text-2xl font-bold text-slate-900 mt-1 font-mono">
+        <div className="kpi-card-3d p-4">
+          <div className="text-[11px] text-slate-500 font-extrabold uppercase tracking-wider">
+            Taxable Service Value
+          </div>
+          <div className="text-2xl font-black text-slate-900 mt-1 font-mono-code">
             ₹{totalTaxable.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded p-4">
-          <div className="text-xs text-slate-500 font-medium uppercase">GST Output Tax</div>
-          <div className="text-2xl font-bold text-blue-600 mt-1 font-mono">
-            ₹{totalTaxes.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          <div className="text-[11px] text-slate-400 mt-1">
+            Base investigation fees
           </div>
         </div>
-        <div className="bg-white border border-slate-200 rounded p-4">
-          <div className="text-xs text-slate-500 font-medium uppercase">Gross Billed Total</div>
-          <div className="text-2xl font-bold text-emerald-600 mt-1 font-mono">
+        <div className="kpi-card-3d p-4">
+          <div className="text-[11px] text-blue-600 font-extrabold uppercase tracking-wider">
+            GST Output Tax
+          </div>
+          <div className="text-2xl font-black text-blue-600 mt-1 font-mono-code">
+            ₹{totalTaxes.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </div>
+          <div className="text-[11px] text-blue-500/80 mt-1">
+            Statutory tax liability
+          </div>
+        </div>
+        <div className="kpi-card-3d p-4">
+          <div className="text-[11px] text-emerald-600 font-extrabold uppercase tracking-wider">
+            Gross Billed Total
+          </div>
+          <div className="text-2xl font-black text-emerald-600 mt-1 font-mono-code">
             ₹{totalGross.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </div>
+          <div className="text-[11px] text-emerald-500/80 mt-1">
+            Total receivable from clients
           </div>
         </div>
       </div>
