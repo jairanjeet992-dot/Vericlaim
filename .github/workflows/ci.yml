@@ -1,0 +1,43 @@
+name: Vericlaim CI Pipeline
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  verify:
+    name: Lint, Typecheck & Verification Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint Verification
+        run: npm run lint
+
+      - name: TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: Phase 1 Verification Gates (Unit & Isolation Tests)
+        run: npm run test
+
+      - name: Grep Test (Zero Hardcoded Admin Identity)
+        run: |
+          if grep -rnEi "admin@vericlaim|superadmin@|jairanjeet992@" src/ supabase/migrations/; then
+            echo "CI Failure: Found hardcoded admin credentials or personal emails."
+            exit 1
+          else
+            echo "CI Passed: No hardcoded admin credentials detected."
+          fi

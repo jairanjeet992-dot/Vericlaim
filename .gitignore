@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Next.js build
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+# Environment Variables
+.env
+.env*.local
+!.env.example
+
+# Supabase
+.supabase/
+
+# Legacy reference repository (read-only reference)
+legacy/
+
+# Operating System
+.DS_Store
+Thumbs.db
