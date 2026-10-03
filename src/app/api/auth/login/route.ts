@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { AuthService } from '@/modules/auth/service';
 import { LoginFormSchema } from '@/modules/auth/schema';
 
@@ -15,9 +16,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabase = createServerSupabaseClient();
-    const authService = new AuthService(supabase);
+    // Server-side identity resolution: use admin client to lookup synthetic email
+    // This allows resolving (agency_code, username) without being blocked by unauthenticated RLS
+    let lookupClient;
+    try {
+      lookupClient = createAdminClient();
+    } catch {
+      lookupClient = createServerSupabaseClient();
+    }
 
+    const authService = new AuthService(lookupClient);
     const result = await authService.resolveLoginCredentials(parsed.data);
 
     if (!result.success) {
@@ -32,7 +40,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Sign in with internal synthetic email
+    // Sign in with internal synthetic email on cookie-backed client so session cookies are stored
+    const supabase = createServerSupabaseClient();
     if (result.syntheticEmail) {
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email: result.syntheticEmail,
