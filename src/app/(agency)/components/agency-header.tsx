@@ -42,7 +42,7 @@ export function AgencyHeader() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/command-center?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/command-center?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 

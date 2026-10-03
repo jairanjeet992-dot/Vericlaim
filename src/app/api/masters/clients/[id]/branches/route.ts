@@ -3,6 +3,34 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { getUserContext } from '@/modules/tenancy/service';
 import { MastersService } from '@/modules/masters/service';
 
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const supabase = createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const context = await getUserContext(supabase, user.id);
+  if (!context) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+  try {
+    const { data: branches, error } = await supabase
+      .from('client_branches')
+      .select('*')
+      .eq('agency_id', context.agency_id)
+      .eq('client_id', params.id)
+      .eq('is_active', true)
+      .order('is_default', { ascending: false })
+      .order('branch_name', { ascending: true });
+
+    if (error) throw new Error(error.message);
+    return NextResponse.json({ success: true, data: branches || [] });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }

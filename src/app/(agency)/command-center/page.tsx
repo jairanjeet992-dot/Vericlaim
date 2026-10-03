@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface TileMetric {
   key: string;
@@ -35,7 +36,8 @@ interface SavedFilter {
   is_default: boolean;
 }
 
-export default function CommandCenterPage() {
+function CommandCenterContent() {
+  const searchParams = useSearchParams();
   const [tiles, setTiles] = useState<TileMetric[]>([]);
   const [cases, setCases] = useState<CaseItem[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -115,6 +117,13 @@ export default function CommandCenterPage() {
     fetchTiles();
     fetchSavedFilters();
   }, [fetchTiles, fetchSavedFilters]);
+
+  useEffect(() => {
+    const q = searchParams.get('q') || searchParams.get('search');
+    const tile = searchParams.get('tile');
+    if (q) setSearchQuery(q);
+    if (tile) setSelectedTile(tile);
+  }, [searchParams]);
 
   useEffect(() => {
     fetchCases();
@@ -622,5 +631,13 @@ export default function CommandCenterPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CommandCenterPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-xs text-slate-500">Loading Command Center...</div>}>
+      <CommandCenterContent />
+    </Suspense>
   );
 }

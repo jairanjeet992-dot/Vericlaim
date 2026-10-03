@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     date_from: searchParams.get('date_from') || null,
     date_to: searchParams.get('date_to') || null,
     pending_age_days: searchParams.get('pending_age_days') ? parseInt(searchParams.get('pending_age_days')!, 10) : null,
-    search_query: searchParams.get('q') || null,
+    search_query: searchParams.get('q') || searchParams.get('search') || null,
   };
 
   const pagination: CommandCenterPagination = {
