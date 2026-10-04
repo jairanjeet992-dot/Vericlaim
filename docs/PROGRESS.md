@@ -64,11 +64,15 @@
   8. **Gate 8 (Form 26AS / AIS Matching)**: Exact matches on TAN, FY, section, and amount; unmatched status on unknown TAN records.
   9. **Gate 9 (Aging & Recovery Hub)**: Accurate aging categorization (0-30, 31-60, 61-90, 90+); classification into recovery categories (`billable_unpaid`, `unbilled_approved`).
   10. **Gate 10 (Negative Authorization & Multi-Tenant Isolation)**: Rejects callers without `payments.record` permission; strictly isolates cross-agency payments and allocations.
-- **Verification Commands Executed**:
+- **Verification Commands Executed & CI/CD Status**:
   - `npm run lint` -> Passed (0 errors, 0 warnings).
   - `npm run typecheck` -> Passed (`tsc --noEmit` exited with 0).
   - `npm run test` -> Passed (109/109 tests passing across all 9 test files).
   - `npm run build` -> Passed (All 61 App Router routes compiled and optimized into production build).
+  - Remote DB & Supabase Preview CI: Remote schema migrations synchronized (00001-00009); all migration RLS policies hardened with idempotent `DROP POLICY IF EXISTS`.
+  - GitHub CI Checks on commit `faf30be`:
+    - `Supabase Preview`: **PASSED / SUCCESS** (completed).
+    - `Lint, Typecheck & Verification Gates`: **PASSED / SUCCESS** (completed).
 
 ### Phase 7A Verification Gates & Deliverables Summary (CA-VERIFY)
 - **Migration**: `supabase/migrations/00008_invoicing_gst_credit_notes.sql`:
