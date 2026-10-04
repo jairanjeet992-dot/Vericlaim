@@ -35,6 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_reports_agency_author ON public.reports(agency_id
 
 ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "reports_tenant_select" ON public.reports;
 CREATE POLICY "reports_tenant_select" ON public.reports
   FOR SELECT TO authenticated
   USING (
@@ -46,6 +47,7 @@ CREATE POLICY "reports_tenant_select" ON public.reports
     )
   );
 
+DROP POLICY IF EXISTS "reports_tenant_all" ON public.reports;
 CREATE POLICY "reports_tenant_all" ON public.reports
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id())
@@ -77,6 +79,7 @@ CREATE INDEX IF NOT EXISTS idx_report_versions_case ON public.report_versions(ag
 
 ALTER TABLE public.report_versions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "report_versions_tenant_select" ON public.report_versions;
 CREATE POLICY "report_versions_tenant_select" ON public.report_versions
   FOR SELECT TO authenticated
   USING (
@@ -88,6 +91,7 @@ CREATE POLICY "report_versions_tenant_select" ON public.report_versions
     )
   );
 
+DROP POLICY IF EXISTS "report_versions_tenant_insert" ON public.report_versions;
 CREATE POLICY "report_versions_tenant_insert" ON public.report_versions
   FOR INSERT TO authenticated
   WITH CHECK (agency_id = public.current_agency_id());
@@ -167,6 +171,7 @@ CREATE INDEX IF NOT EXISTS idx_report_comments_target ON public.report_comments(
 
 ALTER TABLE public.report_comments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "report_comments_tenant_select" ON public.report_comments;
 CREATE POLICY "report_comments_tenant_select" ON public.report_comments
   FOR SELECT TO authenticated
   USING (
@@ -178,6 +183,7 @@ CREATE POLICY "report_comments_tenant_select" ON public.report_comments
     )
   );
 
+DROP POLICY IF EXISTS "report_comments_tenant_all" ON public.report_comments;
 CREATE POLICY "report_comments_tenant_all" ON public.report_comments
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id())
@@ -227,6 +233,7 @@ CREATE INDEX IF NOT EXISTS idx_rework_cycles_target ON public.rework_cycles(agen
 
 ALTER TABLE public.rework_cycles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "rework_cycles_tenant_select" ON public.rework_cycles;
 CREATE POLICY "rework_cycles_tenant_select" ON public.rework_cycles
   FOR SELECT TO authenticated
   USING (
@@ -238,6 +245,7 @@ CREATE POLICY "rework_cycles_tenant_select" ON public.rework_cycles
     )
   );
 
+DROP POLICY IF EXISTS "rework_cycles_tenant_all" ON public.rework_cycles;
 CREATE POLICY "rework_cycles_tenant_all" ON public.rework_cycles
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id())
@@ -272,10 +280,12 @@ CREATE INDEX IF NOT EXISTS idx_courier_dockets_agency_client ON public.courier_d
 
 ALTER TABLE public.courier_dockets ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "courier_dockets_tenant_select" ON public.courier_dockets;
 CREATE POLICY "courier_dockets_tenant_select" ON public.courier_dockets
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id());
 
+DROP POLICY IF EXISTS "courier_dockets_tenant_all" ON public.courier_dockets;
 CREATE POLICY "courier_dockets_tenant_all" ON public.courier_dockets
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id())
@@ -310,6 +320,7 @@ CREATE INDEX IF NOT EXISTS idx_hardcopy_packets_docket ON public.hardcopy_packet
 
 ALTER TABLE public.hardcopy_packets ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "hardcopy_packets_tenant_select" ON public.hardcopy_packets;
 CREATE POLICY "hardcopy_packets_tenant_select" ON public.hardcopy_packets
   FOR SELECT TO authenticated
   USING (
@@ -321,6 +332,7 @@ CREATE POLICY "hardcopy_packets_tenant_select" ON public.hardcopy_packets
     )
   );
 
+DROP POLICY IF EXISTS "hardcopy_packets_tenant_all" ON public.hardcopy_packets;
 CREATE POLICY "hardcopy_packets_tenant_all" ON public.hardcopy_packets
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id())
@@ -355,6 +367,7 @@ CREATE INDEX IF NOT EXISTS idx_hardcopy_movements_handler ON public.hardcopy_mov
 
 ALTER TABLE public.hardcopy_movements ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "hardcopy_movements_tenant_select" ON public.hardcopy_movements;
 CREATE POLICY "hardcopy_movements_tenant_select" ON public.hardcopy_movements
   FOR SELECT TO authenticated
   USING (
@@ -366,6 +379,7 @@ CREATE POLICY "hardcopy_movements_tenant_select" ON public.hardcopy_movements
     )
   );
 
+DROP POLICY IF EXISTS "hardcopy_movements_tenant_insert" ON public.hardcopy_movements;
 CREATE POLICY "hardcopy_movements_tenant_insert" ON public.hardcopy_movements
   FOR INSERT TO authenticated
   WITH CHECK (agency_id = public.current_agency_id());

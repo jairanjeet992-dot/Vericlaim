@@ -40,6 +40,7 @@ CREATE INDEX IF NOT EXISTS idx_activities_due
 -- Enable RLS for activities
 ALTER TABLE public.investigation_activities ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "activities_tenant_select" ON public.investigation_activities;
 CREATE POLICY "activities_tenant_select" ON public.investigation_activities
   FOR SELECT TO authenticated
   USING (
@@ -51,6 +52,7 @@ CREATE POLICY "activities_tenant_select" ON public.investigation_activities
     )
   );
 
+DROP POLICY IF EXISTS "activities_tenant_all" ON public.investigation_activities;
 CREATE POLICY "activities_tenant_all" ON public.investigation_activities
   FOR ALL TO authenticated
   USING (
@@ -110,6 +112,7 @@ CREATE INDEX IF NOT EXISTS idx_documents_uploaded_by
 -- Enable RLS on documents
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "documents_tenant_select" ON public.documents;
 CREATE POLICY "documents_tenant_select" ON public.documents
   FOR SELECT TO authenticated
   USING (
@@ -122,12 +125,14 @@ CREATE POLICY "documents_tenant_select" ON public.documents
     )
   );
 
+DROP POLICY IF EXISTS "documents_tenant_insert" ON public.documents;
 CREATE POLICY "documents_tenant_insert" ON public.documents
   FOR INSERT TO authenticated
   WITH CHECK (
     agency_id = public.current_agency_id()
   );
 
+DROP POLICY IF EXISTS "documents_tenant_update" ON public.documents;
 CREATE POLICY "documents_tenant_update" ON public.documents
   FOR UPDATE TO authenticated
   USING (

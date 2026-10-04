@@ -36,6 +36,7 @@ AS $$
   );
 $$;
 
+DROP POLICY IF EXISTS "platform_admins_read" ON public.platform_admins;
 CREATE POLICY "platform_admins_read" ON public.platform_admins
   FOR SELECT TO authenticated
   USING (public.is_platform_admin());
@@ -56,6 +57,7 @@ CREATE TABLE IF NOT EXISTS public.plans (
 
 ALTER TABLE public.plans ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "plans_read_all" ON public.plans;
 CREATE POLICY "plans_read_all" ON public.plans
   FOR SELECT TO authenticated
   USING (true);
@@ -106,10 +108,12 @@ AS $$
 $$;
 
 -- RLS: Agency users can view their own agency. Platform admins can view/manage all.
+DROP POLICY IF EXISTS "agencies_tenant_read" ON public.agencies;
 CREATE POLICY "agencies_tenant_read" ON public.agencies
   FOR SELECT TO authenticated
   USING (id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "agencies_platform_admin_all" ON public.agencies;
 CREATE POLICY "agencies_platform_admin_all" ON public.agencies
   FOR ALL TO authenticated
   USING (public.is_platform_admin())
@@ -129,10 +133,12 @@ CREATE TABLE IF NOT EXISTS public.agency_subscriptions (
 
 ALTER TABLE public.agency_subscriptions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "subscriptions_tenant_read" ON public.agency_subscriptions;
 CREATE POLICY "subscriptions_tenant_read" ON public.agency_subscriptions
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "subscriptions_platform_admin_all" ON public.agency_subscriptions;
 CREATE POLICY "subscriptions_platform_admin_all" ON public.agency_subscriptions
   FOR ALL TO authenticated
   USING (public.is_platform_admin())
@@ -166,10 +172,12 @@ CREATE INDEX IF NOT EXISTS idx_users_reports_to ON public.users(reports_to_id);
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "users_tenant_read" ON public.users;
 CREATE POLICY "users_tenant_read" ON public.users
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "users_tenant_modify" ON public.users;
 CREATE POLICY "users_tenant_modify" ON public.users
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -226,6 +234,7 @@ CREATE TABLE IF NOT EXISTS public.permissions (
 
 ALTER TABLE public.permissions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "permissions_read_all" ON public.permissions;
 CREATE POLICY "permissions_read_all" ON public.permissions
   FOR SELECT TO authenticated
   USING (true);
@@ -282,10 +291,12 @@ CREATE INDEX IF NOT EXISTS idx_roles_agency ON public.roles(agency_id);
 
 ALTER TABLE public.roles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "roles_tenant_read" ON public.roles;
 CREATE POLICY "roles_tenant_read" ON public.roles
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "roles_tenant_modify" ON public.roles;
 CREATE POLICY "roles_tenant_modify" ON public.roles
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -299,6 +310,7 @@ CREATE TABLE IF NOT EXISTS public.role_permissions (
 
 ALTER TABLE public.role_permissions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "role_permissions_tenant_read" ON public.role_permissions;
 CREATE POLICY "role_permissions_tenant_read" ON public.role_permissions
   FOR SELECT TO authenticated
   USING (
@@ -317,6 +329,7 @@ CREATE TABLE IF NOT EXISTS public.user_roles (
 
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "user_roles_tenant_read" ON public.user_roles;
 CREATE POLICY "user_roles_tenant_read" ON public.user_roles
   FOR SELECT TO authenticated
   USING (
@@ -339,6 +352,7 @@ CREATE TABLE IF NOT EXISTS public.user_permissions (
 
 ALTER TABLE public.user_permissions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "user_permissions_tenant_read" ON public.user_permissions;
 CREATE POLICY "user_permissions_tenant_read" ON public.user_permissions
   FOR SELECT TO authenticated
   USING (
@@ -418,6 +432,7 @@ CREATE INDEX IF NOT EXISTS idx_audit_logs_entity ON public.audit_logs(entity_typ
 
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "audit_logs_tenant_read" ON public.audit_logs;
 CREATE POLICY "audit_logs_tenant_read" ON public.audit_logs
   FOR SELECT TO authenticated
   USING (
@@ -426,6 +441,7 @@ CREATE POLICY "audit_logs_tenant_read" ON public.audit_logs
     OR public.is_platform_admin()
   );
 
+DROP POLICY IF EXISTS "audit_logs_insert" ON public.audit_logs;
 CREATE POLICY "audit_logs_insert" ON public.audit_logs
   FOR INSERT TO authenticated
   WITH CHECK (

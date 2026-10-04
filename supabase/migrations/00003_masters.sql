@@ -32,10 +32,12 @@ CREATE TABLE IF NOT EXISTS public.client_branches (
 CREATE INDEX IF NOT EXISTS idx_client_branches_agency ON public.client_branches(agency_id, client_id);
 ALTER TABLE public.client_branches ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "client_branches_tenant_read" ON public.client_branches;
 CREATE POLICY "client_branches_tenant_read" ON public.client_branches
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "client_branches_tenant_modify" ON public.client_branches;
 CREATE POLICY "client_branches_tenant_modify" ON public.client_branches
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -58,10 +60,12 @@ CREATE TABLE IF NOT EXISTS public.client_contacts (
 
 ALTER TABLE public.client_contacts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "client_contacts_tenant_read" ON public.client_contacts;
 CREATE POLICY "client_contacts_tenant_read" ON public.client_contacts
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "client_contacts_tenant_modify" ON public.client_contacts;
 CREATE POLICY "client_contacts_tenant_modify" ON public.client_contacts
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -84,10 +88,12 @@ CREATE TABLE IF NOT EXISTS public.client_rate_cards (
 
 ALTER TABLE public.client_rate_cards ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "client_rate_cards_tenant_read" ON public.client_rate_cards;
 CREATE POLICY "client_rate_cards_tenant_read" ON public.client_rate_cards
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "client_rate_cards_tenant_modify" ON public.client_rate_cards;
 CREATE POLICY "client_rate_cards_tenant_modify" ON public.client_rate_cards
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -110,10 +116,12 @@ CREATE TABLE IF NOT EXISTS public.case_types (
 
 ALTER TABLE public.case_types ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "case_types_tenant_read" ON public.case_types;
 CREATE POLICY "case_types_tenant_read" ON public.case_types
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "case_types_tenant_modify" ON public.case_types;
 CREATE POLICY "case_types_tenant_modify" ON public.case_types
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -134,10 +142,12 @@ CREATE TABLE IF NOT EXISTS public.outcomes (
 
 ALTER TABLE public.outcomes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "outcomes_tenant_read" ON public.outcomes;
 CREATE POLICY "outcomes_tenant_read" ON public.outcomes
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "outcomes_tenant_modify" ON public.outcomes;
 CREATE POLICY "outcomes_tenant_modify" ON public.outcomes
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -157,10 +167,12 @@ CREATE TABLE IF NOT EXISTS public.sla_policies (
 
 ALTER TABLE public.sla_policies ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "sla_policies_tenant_read" ON public.sla_policies;
 CREATE POLICY "sla_policies_tenant_read" ON public.sla_policies
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "sla_policies_tenant_modify" ON public.sla_policies;
 CREATE POLICY "sla_policies_tenant_modify" ON public.sla_policies
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -203,10 +215,12 @@ CREATE INDEX IF NOT EXISTS idx_investigators_pan_blind ON public.investigators(a
 
 ALTER TABLE public.investigators ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "investigators_tenant_read" ON public.investigators;
 CREATE POLICY "investigators_tenant_read" ON public.investigators
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "investigators_tenant_modify" ON public.investigators;
 CREATE POLICY "investigators_tenant_modify" ON public.investigators
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -231,10 +245,12 @@ CREATE INDEX IF NOT EXISTS idx_inv_payment_terms_lookup
 
 ALTER TABLE public.investigator_payment_terms ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "investigator_payment_terms_read" ON public.investigator_payment_terms;
 CREATE POLICY "investigator_payment_terms_read" ON public.investigator_payment_terms
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "investigator_payment_terms_modify" ON public.investigator_payment_terms;
 CREATE POLICY "investigator_payment_terms_modify" ON public.investigator_payment_terms
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())

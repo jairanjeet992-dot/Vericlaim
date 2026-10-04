@@ -31,10 +31,12 @@ CREATE INDEX IF NOT EXISTS idx_client_payments_date ON public.client_payments(ag
 
 ALTER TABLE public.client_payments ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "client_payments_tenant_read" ON public.client_payments;
 CREATE POLICY "client_payments_tenant_read" ON public.client_payments
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "client_payments_tenant_modify" ON public.client_payments;
 CREATE POLICY "client_payments_tenant_modify" ON public.client_payments
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -57,10 +59,12 @@ CREATE INDEX IF NOT EXISTS idx_payment_allocations_invoice ON public.payment_all
 
 ALTER TABLE public.payment_allocations ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "payment_allocations_tenant_read" ON public.payment_allocations;
 CREATE POLICY "payment_allocations_tenant_read" ON public.payment_allocations
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "payment_allocations_tenant_modify" ON public.payment_allocations;
 CREATE POLICY "payment_allocations_tenant_modify" ON public.payment_allocations
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -90,10 +94,12 @@ CREATE INDEX IF NOT EXISTS idx_tds_receivables_client ON public.tds_receivables(
 
 ALTER TABLE public.tds_receivables ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "tds_receivables_tenant_read" ON public.tds_receivables;
 CREATE POLICY "tds_receivables_tenant_read" ON public.tds_receivables
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "tds_receivables_tenant_modify" ON public.tds_receivables;
 CREATE POLICY "tds_receivables_tenant_modify" ON public.tds_receivables
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -120,10 +126,12 @@ CREATE INDEX IF NOT EXISTS idx_form_26as_records_agency ON public.form_26as_reco
 
 ALTER TABLE public.form_26as_records ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "form_26as_records_tenant_read" ON public.form_26as_records;
 CREATE POLICY "form_26as_records_tenant_read" ON public.form_26as_records
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "form_26as_records_tenant_modify" ON public.form_26as_records;
 CREATE POLICY "form_26as_records_tenant_modify" ON public.form_26as_records
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS public.agency_doc_sequences (
 
 ALTER TABLE public.agency_doc_sequences ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "agency_doc_sequences_tenant" ON public.agency_doc_sequences;
 CREATE POLICY "agency_doc_sequences_tenant" ON public.agency_doc_sequences
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
@@ -167,10 +168,12 @@ CREATE INDEX IF NOT EXISTS idx_case_status_history_agency
 
 ALTER TABLE public.case_status_history ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "case_status_history_read" ON public.case_status_history;
 CREATE POLICY "case_status_history_read" ON public.case_status_history
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "case_status_history_insert" ON public.case_status_history;
 CREATE POLICY "case_status_history_insert" ON public.case_status_history
   FOR INSERT TO authenticated
   WITH CHECK (agency_id = public.current_agency_id() OR public.is_platform_admin());
@@ -207,10 +210,12 @@ CREATE TABLE IF NOT EXISTS public.case_notes (
 CREATE INDEX IF NOT EXISTS idx_case_notes_case ON public.case_notes(case_id, created_at DESC);
 ALTER TABLE public.case_notes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "case_notes_read" ON public.case_notes;
 CREATE POLICY "case_notes_read" ON public.case_notes
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "case_notes_insert" ON public.case_notes;
 CREATE POLICY "case_notes_insert" ON public.case_notes
   FOR INSERT TO authenticated
   WITH CHECK (agency_id = public.current_agency_id() OR public.is_platform_admin());
@@ -232,10 +237,12 @@ CREATE TABLE IF NOT EXISTS public.case_tasks (
 CREATE INDEX IF NOT EXISTS idx_case_tasks_case ON public.case_tasks(case_id, status);
 ALTER TABLE public.case_tasks ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "case_tasks_read" ON public.case_tasks;
 CREATE POLICY "case_tasks_read" ON public.case_tasks
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "case_tasks_write" ON public.case_tasks;
 CREATE POLICY "case_tasks_write" ON public.case_tasks
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())

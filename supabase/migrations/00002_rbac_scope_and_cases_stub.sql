@@ -18,10 +18,12 @@ CREATE TABLE IF NOT EXISTS public.clients (
 CREATE INDEX IF NOT EXISTS idx_clients_agency ON public.clients(agency_id);
 ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "clients_tenant_read" ON public.clients;
 CREATE POLICY "clients_tenant_read" ON public.clients
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "clients_tenant_modify" ON public.clients;
 CREATE POLICY "clients_tenant_modify" ON public.clients
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -46,10 +48,12 @@ CREATE INDEX IF NOT EXISTS idx_manager_scopes_mgr
 
 ALTER TABLE public.manager_scopes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "manager_scopes_tenant_read" ON public.manager_scopes;
 CREATE POLICY "manager_scopes_tenant_read" ON public.manager_scopes
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "manager_scopes_tenant_modify" ON public.manager_scopes;
 CREATE POLICY "manager_scopes_tenant_modify" ON public.manager_scopes
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -93,6 +97,7 @@ CREATE INDEX IF NOT EXISTS idx_case_investigators_lookup
 
 ALTER TABLE public.case_investigators ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "case_investigators_tenant_read" ON public.case_investigators;
 CREATE POLICY "case_investigators_tenant_read" ON public.case_investigators
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
@@ -186,6 +191,7 @@ $$;
 -- 7. ROW LEVEL SECURITY ON CASES TABLE
 ALTER TABLE public.cases ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "cases_tenant_and_scope_read" ON public.cases;
 CREATE POLICY "cases_tenant_and_scope_read" ON public.cases
   FOR SELECT TO authenticated
   USING (
@@ -194,6 +200,7 @@ CREATE POLICY "cases_tenant_and_scope_read" ON public.cases
     AND public.can_view_case(agency_id, owner_manager_id, data_entry_user_id, id)
   );
 
+DROP POLICY IF EXISTS "cases_tenant_insert" ON public.cases;
 CREATE POLICY "cases_tenant_insert" ON public.cases
   FOR INSERT TO authenticated
   WITH CHECK (
@@ -201,6 +208,7 @@ CREATE POLICY "cases_tenant_insert" ON public.cases
     AND public.has_permission('cases.create')
   );
 
+DROP POLICY IF EXISTS "cases_tenant_update" ON public.cases;
 CREATE POLICY "cases_tenant_update" ON public.cases
   FOR UPDATE TO authenticated
   USING (

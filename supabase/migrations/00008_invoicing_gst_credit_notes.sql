@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS public.invoice_sequences (
 
 ALTER TABLE public.invoice_sequences ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "invoice_sequences_tenant_all" ON public.invoice_sequences;
 CREATE POLICY "invoice_sequences_tenant_all" ON public.invoice_sequences
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -102,10 +103,12 @@ CREATE INDEX IF NOT EXISTS idx_invoices_financial_year ON public.invoices(agency
 
 ALTER TABLE public.invoices ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "invoices_tenant_read" ON public.invoices;
 CREATE POLICY "invoices_tenant_read" ON public.invoices
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "invoices_tenant_modify" ON public.invoices;
 CREATE POLICY "invoices_tenant_modify" ON public.invoices
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -136,10 +139,12 @@ CREATE INDEX IF NOT EXISTS idx_invoice_items_case ON public.invoice_items(case_i
 
 ALTER TABLE public.invoice_items ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "invoice_items_tenant_read" ON public.invoice_items;
 CREATE POLICY "invoice_items_tenant_read" ON public.invoice_items
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "invoice_items_tenant_modify" ON public.invoice_items;
 CREATE POLICY "invoice_items_tenant_modify" ON public.invoice_items
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -162,10 +167,12 @@ CREATE INDEX IF NOT EXISTS idx_invoice_taxes_invoice ON public.invoice_taxes(inv
 
 ALTER TABLE public.invoice_taxes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "invoice_taxes_tenant_read" ON public.invoice_taxes;
 CREATE POLICY "invoice_taxes_tenant_read" ON public.invoice_taxes
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "invoice_taxes_tenant_modify" ON public.invoice_taxes;
 CREATE POLICY "invoice_taxes_tenant_modify" ON public.invoice_taxes
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())
@@ -197,10 +204,12 @@ CREATE INDEX IF NOT EXISTS idx_credit_debit_notes_invoice ON public.credit_debit
 
 ALTER TABLE public.credit_debit_notes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "credit_debit_notes_tenant_read" ON public.credit_debit_notes;
 CREATE POLICY "credit_debit_notes_tenant_read" ON public.credit_debit_notes
   FOR SELECT TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin());
 
+DROP POLICY IF EXISTS "credit_debit_notes_tenant_modify" ON public.credit_debit_notes;
 CREATE POLICY "credit_debit_notes_tenant_modify" ON public.credit_debit_notes
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() OR public.is_platform_admin())

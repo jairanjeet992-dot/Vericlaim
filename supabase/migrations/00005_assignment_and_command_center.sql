@@ -91,6 +91,7 @@ CREATE INDEX IF NOT EXISTS idx_saved_filters_user
 
 ALTER TABLE public.command_center_saved_filters ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "saved_filters_tenant_user_all" ON public.command_center_saved_filters;
 CREATE POLICY "saved_filters_tenant_user_all" ON public.command_center_saved_filters
   FOR ALL TO authenticated
   USING (agency_id = public.current_agency_id() AND user_id = auth.uid())
