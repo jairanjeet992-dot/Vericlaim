@@ -80,7 +80,7 @@
   - `npm run typecheck` -> Passed (`tsc --noEmit` exited with 0).
   - `npm run test` -> Passed (136/136 tests passing across all 10 test files).
   - `npm run build` -> Passed (All 66 App Router routes compiled into production build).
-  - Remote Database: Migration `00010_investigator_finance_payouts_sla_scorecard` applied and verified.
+  - Remote Database: Migration `00010` applied and synchronized in `schema_migrations`.
 
 ### Phase 7B Verification Gates & Deliverables Summary (CA-VERIFY)
 - **Migration**: `supabase/migrations/00009_payments_tds_receivables_recovery.sql`:
