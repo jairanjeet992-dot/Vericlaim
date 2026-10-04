@@ -1,6 +1,6 @@
 # Project Progress & Phase Tracking
 
-## Current Status: Phase 8 Completed (Awaiting Approval to proceed to Phase 9A)
+## Current Status: Phase 9A Completed (Awaiting Approval to proceed to Phase 9B)
 
 ### Phase Roadmap
 - [x] **Phase L**: Legacy analysis (docs only, no app code) - COMPLETED
@@ -15,9 +15,61 @@
 - [x] **Phase 7A**: GST Invoicing Engine, Invoices, Credit Notes & Server-side PDF (CA-VERIFY) - COMPLETED
 - [x] **Phase 7B**: Client Payment Ledger, Short-settlement TDS & Recovery Hub - COMPLETED
 - [x] **Phase 8**: Investigator Finance, Effective-dated Terms, Expenses & Monthly Payouts - COMPLETED
-- [ ] **Phase 9A**: Search, reports, exports, notifications
+- [x] **Phase 9A**: Search, reports, exports, notifications - COMPLETED
 - [ ] **Phase 9B**: Security Hardening, RLS Pentest, Rate Limiting & CSP
 - [ ] **Phase 10**: Data Migration Pipeline from Legacy DNA to Vericlaim Multi-tenant
+
+### Phase 9A Verification Gates & Deliverables Summary
+- **Migration**: `supabase/migrations/00011_global_search_reports_notifications.sql`:
+  - `pg_trgm` extension installed.
+  - GIN trigram indexes on `cases` (`doc_code`, `normalized_claim_no`, `policy_no`, `insured_name`, `location_city`, `hospital_name`), `invoices` (`invoice_number`), `client_payments` (`utr_number`), `courier_dockets` (`awb_number`, `docket_number`), and `investigators` (`code`, `full_name`).
+  - `export_logs`: Append-only export audit trail tracking `agency_id`, `user_id`, `export_type`, `format` (`CSV`, `EXCEL`, `PDF`), `filter_params`, `row_count`, `sha256`, `status` (`COMPLETED`, `DENIED`, `FAILED`), `denial_reason`, `ip_address`, and `created_at`. RLS policies.
+  - `notifications`: Multi-channel in-app notification ledger tracking `agency_id`, `user_id`, `title`, `message`, `notification_type`, `channel` (`IN_APP`, `EMAIL`, `SMS_STUB`, `WHATSAPP_STUB`), `priority`, `is_read`, `read_at`, `action_url`, `metadata`. RLS policies.
+  - `search_global_agency_data`: High-performance stored function searching across Cases, Invoices, Payments, Courier Dockets, and Investigators with similarity scoring, strictly scope-filtered via `public.can_view_case(c.id, c.owner_manager_id, c.data_entry_user_id)`.
+  - Registered migration version `'00011'` in `supabase_migrations.schema_migrations`.
+- **Core Modules & Pure Engines (Rule A3)**:
+  - `src/modules/search/`:
+    - `types.ts`, `schema.ts`: Search entity schemas and Zod query validator.
+    - `search-engine.ts`: High-speed global search engine with trigram similarity, phone blind index lookup (`computeBlindIndex`), and strict scope filtering (`ALL`, `TEAM`, `ASSIGNED`, `OWN_ENTERED`).
+  - `src/modules/reports/`:
+    - `analytics-types.ts`, `analytics-schema.ts`: Detailed schemas for operational, financial, and logistics metrics.
+    - `report-analytics.ts`:
+      - `calculateOperationalMetrics`: Evaluates volume breakdowns by client, investigator, location, case type, outcome, SLA compliance %, and stage TATs (Intake to Verification, Verification to Assignment, Field Investigation, Review, and Closure).
+      - `calculateFinancialMetrics`: Evaluates gross billed, net service revenue, statutory GST liability separation (Rule A1, A6, A12 & CA-VERIFY Q-CA-01), receivables aging (`0-30`, `31-60`, `61-90`, `90+`), client TDS receivables, direct investigator costs, and gross/net profit margins with `decimal.js` zero-float arithmetic.
+      - `calculatePhysicalLogisticsMetrics`: Evaluates packet archive vs transit counts, delivery acknowledgment rate %, and courier transit velocity.
+    - `export-service.ts`: Permission-gated (`reports.export`), scope-filtered exporter generating CSV, Excel (`exceljs`), and PDF with SHA-256 integrity hash and mandatory auditing to `export_logs` on all attempts (both successful and unauthorized).
+  - `src/modules/notifications/`:
+    - `types.ts`, `schema.ts`: Multi-channel schemas and interfaces.
+    - `notification-engine.ts`: Multi-channel dispatcher supporting `IN_APP`, `EMAIL` (`MockEmailProvider`), `SMS_STUB`, and `WHATSAPP_STUB` (Rule A11).
+    - Lifecycle event dispatchers: `notifyCaseAssigned`, `notifyReworkRequested` (escalated priority at cycle >= 3), `notifyReportApproved`, `notifySlaWarning`, `notifyPaymentReceived`, `notifyExpenseDecision`, `notifyPayoutDisbursed`.
+    - In-App notification ledger reader and read state managers.
+- **App Router UI Shell & Endpoints**:
+  - `src/app/(agency)/analytics/page.tsx`: Comprehensive management dashboard with KPI tiles, date range filter, operations telemetry, financial intelligence with statutory GST separation, physical logistics transit, and export audit log viewer.
+  - `src/app/(agency)/components/agency-header.tsx`: Enhanced with live debounced global search dropdown with entity badges and real-time notification bell dropdown with unread counter.
+  - `src/app/(agency)/components/agency-sidebar.tsx`: Added "Management Analytics" navigation link under Quality & Evidence.
+  - API Routes:
+    - `GET /api/search`
+    - `GET /api/reports/operations`
+    - `GET /api/reports/financial`
+    - `GET /api/reports/logistics`
+    - `POST /api/reports/export`
+    - `GET /api/export-logs`
+    - `GET, PATCH /api/notifications`
+    - `POST /api/notifications/read-all`
+- **Automated Verification Gates (`tests/phase9a/search_reports_notifications_gates.test.ts` - 18/18 passed, 154/154 total across suite)**:
+  - **Gate 1**: Global search execution benchmark under 300ms on 100k simulated indexed cases (< 50ms).
+  - **Gate 2**: Zero out-of-scope leakage (two managers with separate scopes test: M1 sees only M1 cases; M2 sees only M2 cases; investigator sees only assigned cases; data entry sees only own entered cases; cross-agency isolation).
+  - **Gate 3**: Exports strictly respect user scope (out-of-scope cases stripped from exports).
+  - **Gate 4**: Export attempts (successful and unauthorized) audited in `export_logs` with row counts, status, denial reasons, and SHA-256 integrity hashes.
+  - **Gate 5**: Multi-channel notifications dispatched on core lifecycle events across in-app, email, and Rule A11 SMS/WhatsApp stubs.
+  - **Gate 6**: Statutory GST separation & profit engine (output GST treated purely as balance sheet liability, not income or profit; net service revenue = taxable base; gross profit = taxable revenue - direct costs).
+  - **Gate 7**: Physical logistics & courier transit telemetry.
+- **Verification Commands Executed & CI/CD Status**:
+  - `npm run lint` -> Passed (0 errors, 0 warnings).
+  - `npm run typecheck` -> Passed (`tsc --noEmit` exited with 0).
+  - `npm run test` -> Passed (154/154 tests passing across all 11 test files).
+  - `npm run build` -> Passed (All 75 App Router routes compiled into production build).
+  - Remote Database: Migration `00011` applied and synchronized in `schema_migrations`.
 
 ### Phase 8 Verification Gates & Deliverables Summary (CA-VERIFY)
 - **Migration**: `supabase/migrations/00010_investigator_finance_payouts_sla_scorecard.sql`:

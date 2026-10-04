@@ -3,3 +3,7 @@ export * from './schema';
 export * from './diff';
 export * from './rework';
 export * from './service';
+export * from './analytics-types';
+export * from './analytics-schema';
+export * from './report-analytics';
+export * from './export-service';
