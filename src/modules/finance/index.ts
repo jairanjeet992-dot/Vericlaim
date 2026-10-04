@@ -4,3 +4,8 @@ export * from './einvoice';
 export * from './types';
 export * from './schema';
 export * from './service';
+export * from './payments';
+export * from './payment-types';
+export * from './payment-schema';
+export * from './payment-service';
+

@@ -1,6 +1,6 @@
 # Project Progress & Phase Tracking
 
-## Current Status: Phase 7A Completed (Awaiting CA Verification & Approval to proceed to Phase 7B)
+## Current Status: Phase 7B Completed (Awaiting Approval to proceed to Phase 8)
 
 ### Phase Roadmap
 - [x] **Phase L**: Legacy analysis (docs only, no app code) - COMPLETED
@@ -13,11 +13,62 @@
 - [x] **Phase 5**: Investigation activities, evidence pipeline (R2), versioning, PWA offline - COMPLETED
 - [x] **Phase 6**: Reports, review, rework engine, and hardcopy logistics - COMPLETED
 - [x] **Phase 7A**: GST Invoicing Engine, Invoices, Credit Notes & Server-side PDF (CA-VERIFY) - COMPLETED
-- [ ] **Phase 7B**: Client Payment Ledger, Short-settlement TDS & Recovery Hub
+- [x] **Phase 7B**: Client Payment Ledger, Short-settlement TDS & Recovery Hub - COMPLETED
 - [ ] **Phase 8**: Investigator Finance, Effective-dated Terms, Expenses & Monthly Payouts
 - [ ] **Phase 9A**: Audit Trails, DPDP Compliance, PII Masking & HMAC Blind Indexing
 - [ ] **Phase 9B**: Security Hardening, RLS Pentest, Rate Limiting & CSP
 - [ ] **Phase 10**: Data Migration Pipeline from Legacy DNA to Vericlaim Multi-tenant
+
+### Phase 7B Verification Gates & Deliverables Summary (CA-VERIFY)
+- **Migration**: `supabase/migrations/00009_payments_tds_receivables_recovery.sql`:
+  - `client_payments`: Multi-tenant payment ledger (`agency_id`, `client_id`, `client_branch_id`, `payment_date`, `amount`, `unapplied_amount`, `payment_mode`, `utr_number`, `bank_name`, `reference_note`, `is_advance`, `idempotency_key`, `version`). Unique UTR per agency (`uq_client_payments_agency_utr`) and unique idempotency key (`uq_client_payments_idempotency`). RLS policies.
+  - `payment_allocations`: Append-only invoice/case payment allocations. Protected by database immutability trigger `trg_prevent_payment_allocations_mutation` blocking all UPDATE/DELETE mutations (Rule A6).
+  - `tds_receivables`: Client Section 194J / 194C TDS deductions linked to invoice/payment with `is_valid` flag, certificate number, Form 26AS status, and audit metadata.
+  - `form_26as_records`: Form 26AS / AIS ledger tracking deductor TAN, deductor name, financial year, TDS deducted, amount paid, and reconciliation match status (`UNMATCHED`, `MATCHED`, `PARTIALLY_MATCHED`).
+  - Stored function `get_invoice_outstanding(p_invoice_id)` implementing deterministic formula: `total_amount - (allocated_amount + valid_tds)`.
+  - Stored procedure `allocate_payment_transaction`: Atomic, race-free allocation with row-level locks (`FOR UPDATE`) on payment and invoice records, strictly preventing over-allocation and managing invoice status (`PARTIALLY_PAID`, `PAID`).
+- **Core Modules & Pure Engines**:
+  - `src/modules/finance/payments.ts`: Pure domain engine using `decimal.js` and `ROUND_HALF_UP` (Rule A6):
+    - `calculateInvoiceOutstanding`: Total Amount - Received - Valid TDS.
+    - `detectShortSettlementTds`: Heuristic engine auto-detecting ~10% shortfall on Gross Total or Taxable Base (CBDT Circular 23/2017) within $\pm₹5$ tolerance with mandatory user confirmation (never applied silently).
+    - `match26ASRecord`: Confidence-scored candidate matcher between imported 26AS records and internal recorded TDS receivables.
+    - `calculateAgingBuckets`: Categorizes outstanding invoices into standard aging buckets (`0-30`, `31-60`, `61-90`, `90+` days).
+    - `calculateProfitAndLoss`: Statutory P&L strictly separating output GST collected from service revenue, calculating gross profit as `taxable service revenue - direct investigator payable`, and reporting statutory GST liability separately (resolving Q-CA-01).
+    - `classifyRecoveryItems`: Categorizes unpaid invoices and unbilled approved cases into recovery hub buckets.
+  - `src/modules/finance/payment-types.ts`, `src/modules/finance/payment-schema.ts`: Zod validation schemas and type definitions.
+  - `src/modules/finance/payment-service.ts`: `PaymentService` coordinating payment recording, single & bulk allocations, TDS records, Form 26AS batch imports, aging telemetry, client ledgers, and recovery items.
+- **App Router UI Shell & Endpoints**:
+  - `src/app/(agency)/payments/page.tsx`: Payments Command Center with 5 tabs (Overview & Ledger, Remittances & Allocations, Short-Settlement TDS, Form 26AS Matcher, Recovery Hub & Aging), new payment drawer with advance support, single/bulk allocation drawer, and short-settlement auto-suggestion modal.
+  - Sidebar Navigation: Added Payments quick link to agency navigation sidebar (`src/app/(agency)/components/agency-sidebar.tsx`).
+  - API Routes:
+    - `GET, POST /api/payments`
+    - `POST /api/payments/allocate` (Single & Bulk allocations)
+    - `GET, POST /api/payments/tds`
+    - `GET /api/payments/short-settlement`
+    - `POST /api/payments/26as/import`
+    - `GET /api/payments/ledger`
+    - `GET /api/payments/aging`
+    - `GET /api/payments/recovery`
+    - `GET /api/payments/profit`
+- **Automated Gates Passed (`tests/phase7b/payments_tds_recovery_gates.test.ts` - 24/24 passed, 109/109 total across suite)**:
+  1. **Gate 1 (Golden Tests & Remittance)**: Verified full remittance with UTR, payment mode, bank name, advance payment retention, and audit logs.
+  2. **Gate 2 (Duplicate UTR & Idempotency Key)**: Strictly rejects duplicate UTR within the same agency; returns existing cached payment on identical idempotency key.
+  3. **Gate 3 (Over-Allocation Rejection)**: Rejects allocation exceeding invoice remaining outstanding; rejects allocation exceeding payment unapplied balance.
+  4. **Gate 4 (Concurrent Payment Race & Split Allocations)**: Sequential partial allocations until full settlement; bulk multi-invoice remittance allocations.
+  5. **Gate 5 (Hand-Computed Outstanding Formula)**: Verified hand-computed cases; invalid TDS strictly excluded from reducing outstanding balance.
+  6. **Gate 6 (Statutory Profit Engine & GST Separation - Q-CA-01)**: Revenue strictly excludes GST collected; gross profit = service base - direct payable; GST tracked as statutory liability; flags legacy formula defect.
+  7. **Gate 7 (Short-Settlement Auto-Suggestion - TEST-09, TEST-10, TEST-11)**:
+     - TEST-09: Exact 10% TDS on Taxable Base (₹4,130 gross, ₹3,780 received $\rightarrow$ ₹350 TDS suggested).
+     - TEST-10: Exact 10% TDS on Gross Total (₹3,000 gross, ₹2,700 received $\rightarrow$ ₹300 TDS suggested).
+     - TEST-11: Non-matching shortfall (₹4,500 gross, ₹3,800 received $\rightarrow$ 0 TDS, returns null).
+  8. **Gate 8 (Form 26AS / AIS Matching)**: Exact matches on TAN, FY, section, and amount; unmatched status on unknown TAN records.
+  9. **Gate 9 (Aging & Recovery Hub)**: Accurate aging categorization (0-30, 31-60, 61-90, 90+); classification into recovery categories (`billable_unpaid`, `unbilled_approved`).
+  10. **Gate 10 (Negative Authorization & Multi-Tenant Isolation)**: Rejects callers without `payments.record` permission; strictly isolates cross-agency payments and allocations.
+- **Verification Commands Executed**:
+  - `npm run lint` -> Passed (0 errors, 0 warnings).
+  - `npm run typecheck` -> Passed (`tsc --noEmit` exited with 0).
+  - `npm run test` -> Passed (109/109 tests passing across all 9 test files).
+  - `npm run build` -> Passed (All 61 App Router routes compiled and optimized into production build).
 
 ### Phase 7A Verification Gates & Deliverables Summary (CA-VERIFY)
 - **Migration**: `supabase/migrations/00008_invoicing_gst_credit_notes.sql`:
