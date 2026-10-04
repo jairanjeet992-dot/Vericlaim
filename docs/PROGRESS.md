@@ -1,6 +1,6 @@
 # Project Progress & Phase Tracking
 
-## Current Status: Phase 7B Completed (Awaiting Approval to proceed to Phase 8)
+## Current Status: Phase 8 Completed (Awaiting Approval to proceed to Phase 9A)
 
 ### Phase Roadmap
 - [x] **Phase L**: Legacy analysis (docs only, no app code) - COMPLETED
@@ -14,10 +14,73 @@
 - [x] **Phase 6**: Reports, review, rework engine, and hardcopy logistics - COMPLETED
 - [x] **Phase 7A**: GST Invoicing Engine, Invoices, Credit Notes & Server-side PDF (CA-VERIFY) - COMPLETED
 - [x] **Phase 7B**: Client Payment Ledger, Short-settlement TDS & Recovery Hub - COMPLETED
-- [ ] **Phase 8**: Investigator Finance, Effective-dated Terms, Expenses & Monthly Payouts
-- [ ] **Phase 9A**: Audit Trails, DPDP Compliance, PII Masking & HMAC Blind Indexing
+- [x] **Phase 8**: Investigator Finance, Effective-dated Terms, Expenses & Monthly Payouts - COMPLETED
+- [ ] **Phase 9A**: Search, reports, exports, notifications
 - [ ] **Phase 9B**: Security Hardening, RLS Pentest, Rate Limiting & CSP
 - [ ] **Phase 10**: Data Migration Pipeline from Legacy DNA to Vericlaim Multi-tenant
+
+### Phase 8 Verification Gates & Deliverables Summary (CA-VERIFY)
+- **Migration**: `supabase/migrations/00010_investigator_finance_payouts_sla_scorecard.sql`:
+  - `investigator_fee_rules`: Configurable fee rules per `(case_type_id, client_id, state, city)`. Base fees, default TA, special allowances.
+  - `payout_batches`: Monthly corporate bank disbursal batches with gapless batch numbering (`PO-YYYY-MM-001`), totals (`total_gross`, `total_tds`, `total_advances_deducted`, `total_net_disbursable`), status (`DRAFT`, `FINALIZED`, `PAID`, `CANCELLED`), SHA-256 integrity hash, UTR payment reference. Protected by `trg_prevent_paid_payout_batch_mutation` immutability trigger blocking updates/deletes once PAID.
+  - `investigator_payouts`: Per-investigator monthly payout records. Enforces one open payout per investigator per month (`uq_investigator_payouts_open_month`), payment type (`PER_CASE` vs `SALARY`), TDS section (`194J`, `194C`, `194H`, `OTHER`), TDS rate, advance recovery, and net payable.
+  - `investigator_expenses`: TA and operational field expense claims (`TRAVEL_ALLOWANCE`, `FUEL`, `HOTEL`, `PRINTING_STATIONERY`, `HOSPITAL_RECORD_FEE`, `INFORMANT_FEE`, `BONUS`, `ADVANCE`, `DEDUCTION`). Full workflow (`SUBMITTED -> REVIEW -> APPROVED / REJECTED -> IN_PAYOUT -> PAID`).
+  - `payout_items`: Itemized payout lines. Enforces Gate 1 unique index `uq_payout_items_expense` and `uq_payout_items_case_investigator` ensuring an expense or case fee item belongs to only ONE payout! Protected by `trg_prevent_paid_payout_items_mutation`.
+  - `sla_exceptions`: Formal TAT extension request and approval workflow (`PENDING -> APPROVED / REJECTED`).
+  - `hospital_profiles`: Historical fraud & adverse outcome tracker per hospital. Automated risk categorization (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`) and dispatch-time warnings.
+  - `investigator_scorecard_configs`: Configurable agency weights (default A12: 35% TAT, 25% fraud, 25% quality/rework, 15% volume).
+  - RLS policies with idempotent non-destructive `DO $$ BEGIN IF NOT EXISTS (...)` blocks.
+- **Core Modules & Pure Engines (Rule A3)**:
+  - `src/modules/investigators/investigator-fees.ts`:
+    - `resolveEffectivePaymentTerms`: Resolves active salary vs per-case terms as of any reference date.
+    - `calculateCaseInvestigatorFee`: Multi-investigator fee calculation; strictly enforces Rule A12 (Withdrawn case -> 0 investigator payable fee).
+    - `calculateInvestigatorTds`: Computes statutory TDS under Section 194J (10%), 194C (1%), and enforces Section 206AA mandatory 20% penal rate when PAN is missing or invalid.
+    - `compileInvestigatorPayout` & `compilePayoutBatch`: Full aggregation and net disbursal calculation with `decimal.js` round-half-up, verifying `gross - tds - advances - deductions === net` invariant.
+  - `src/modules/sla/sla-engine.ts`:
+    - SLA deadline calculation with approved exception extension hours.
+    - Status evaluation (`NORMAL`, `APPROACHING`, `URGENT`, `BREACHED`) with fake clock support for testing.
+    - `processSlaTicker`: Background ticker evaluating active cases.
+  - `src/modules/scorecard/scorecard-engine.ts`:
+    - Rule A12 weighted scoring model calculating SLA compliance, fraud detection rigor, first-pass report quality without rework, and case volume.
+    - Performance tiers: `ELITE` (>=85), `PROFICIENT` (>=70), `AVERAGE` (>=50), `NEEDS_IMPROVEMENT` (<50).
+  - `src/modules/scorecard/hospital-fraud-engine.ts`:
+    - Hospital fraud risk categorization and automated dispatch warning generator.
+  - `src/modules/investigators/excel-export.ts`:
+    - Generates `.xlsx` corporate bank bulk payout spreadsheet.
+    - Gate 3 invariant: strictly validates that sum of Excel amounts equals DB batch net disbursable. Computes SHA-256.
+  - `src/modules/investigators/pdf-payout-statement.ts`:
+    - Generates server-side printable Payout Statement with earnings, deductions, bank details, and SHA-256 hash.
+  - `src/modules/investigators/investigator-service.ts`:
+    - Coordinates expense claim submissions, one-click admin approvals/rejections, monthly payout batch compilation, and atomic mark-paid settlement.
+- **App Router UI Shell & Endpoints**:
+  - `src/app/(agency)/investigator-finance/page.tsx`: Full command center dashboard with KPI tiles, monthly batches table, expense/TA approval queue, scorecards & tiers table, and hospital fraud heatmap.
+  - API Routes:
+    - `GET, POST /api/investigators/expenses`
+    - `POST /api/investigators/expenses/[id]/approve`
+    - `POST /api/investigators/expenses/[id]/reject`
+    - `POST /api/investigators/payouts/compile`
+    - `GET /api/investigators/payouts/[id]/excel`
+    - `POST /api/investigators/payouts/[id]/pay`
+    - `GET /api/investigators/scorecard`
+    - `POST, PATCH /api/cases/[id]/sla/exception`
+    - `GET /api/hospitals/fraud-warning`
+- **Automated Verification Gates (`tests/phase8/investigator_finance_payouts_sla_gates.test.ts` - 27/27 passed, 136/136 total across suite)**:
+  1. **Gate 1**: Effective-dated terms resolution (`PER_CASE` vs `SALARY` across historical date ranges).
+  2. **Gate 2**: Case fee calculation with travel allowances & Rule A12 Withdrawn case = 0 fee.
+  3. **Gate 3**: TDS engine: Section 194J 10%, 194C 1%, and Section 206AA 20% penal rate without PAN.
+  4. **Gate 4**: Monthly payout compilation invariant (`gross - tds - advances - deductions === net`).
+  5. **Gate 5**: Excel bank bulk payment export generation & invariant verification against DB total.
+  6. **Gate 6**: Server-side PDF payout statement document generation with SHA-256 hash integrity.
+  7. **Gate 7**: SLA engine evaluation (`NORMAL`, `APPROACHING`, `URGENT`, `BREACHED`, extension exceptions with fake clock).
+  8. **Gate 8**: Scorecard engine weighted scoring & performance tier resolution (`ELITE`, `PROFICIENT`, `AVERAGE`, `NEEDS_IMPROVEMENT`).
+  9. **Gate 9**: Hospital fraud heatmap risk evaluation & dispatch-time warning with manager override requirements.
+  10. **Gate 10**: Negative validation tests (mandatory receipts, rejection reasons).
+- **Verification Commands Executed & CI/CD Status**:
+  - `npm run lint` -> Passed (0 errors, 0 warnings).
+  - `npm run typecheck` -> Passed (`tsc --noEmit` exited with 0).
+  - `npm run test` -> Passed (136/136 tests passing across all 10 test files).
+  - `npm run build` -> Passed (All 66 App Router routes compiled into production build).
+  - Remote Database: Migration `00010_investigator_finance_payouts_sla_scorecard` applied and verified.
 
 ### Phase 7B Verification Gates & Deliverables Summary (CA-VERIFY)
 - **Migration**: `supabase/migrations/00009_payments_tds_receivables_recovery.sql`:
