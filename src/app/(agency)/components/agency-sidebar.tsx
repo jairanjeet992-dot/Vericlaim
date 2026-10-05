@@ -22,6 +22,7 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeft,
+  UploadCloud,
 } from 'lucide-react';
 import { useSidebar } from '@/components/sidebar-context';
 
@@ -140,6 +141,13 @@ export function AgencySidebar({ context }: AgencySidebarProps) {
           label: 'Team Hierarchy',
           href: '/settings/team',
           icon: Users2,
+        },
+        {
+          label: 'Legacy Import & Parity',
+          href: '/import',
+          icon: UploadCloud,
+          badge: 'PHASE-9B',
+          badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
         },
         {
           label: 'Security & Audit Vault',
