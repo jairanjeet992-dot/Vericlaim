@@ -184,7 +184,7 @@ export function AgencyHeader() {
   };
 
   return (
-    <header className="bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/80 dark:border-white/10 h-14 px-4 md:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs transition-colors duration-200">
+    <header className="glass sticky top-3 z-30 my-3 mx-3 sm:mx-4 px-4 py-2 flex items-center justify-between shadow-sm transition-all duration-300">
       {/* Left side: Sidebar Toggle & Search Input Bar */}
       <div className="flex items-center space-x-3 flex-1 max-w-xl">
         {/* Sidebar Collapse/Expand Toggle Button */}
@@ -192,20 +192,20 @@ export function AgencyHeader() {
           onClick={toggleSidebar}
           type="button"
           title={`Toggle Sidebar (Ctrl+B) - Currently ${isCollapsed ? 'Collapsed' : 'Expanded'}`}
-          className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 bg-slate-100/80 dark:bg-slate-900/80 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-white/10 transition-all duration-200 shrink-0"
+          className="p-1.5 rounded-full text-[var(--mut)] hover:text-[var(--txt)] hover:bg-[var(--glass2)] border border-[var(--line)] transition-all duration-200 shrink-0"
           aria-label="Toggle Navigation Sidebar"
         >
           {isCollapsed ? (
-            <PanelLeft className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <PanelLeft className="h-4 w-4 text-[var(--ice)]" />
           ) : (
             <PanelLeftClose className="h-4 w-4" />
           )}
         </button>
 
-        {/* Global Case Search Input */}
-        <div ref={searchRef} className="relative w-80 max-w-full">
-          <form onSubmit={handleSearchSubmit}>
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
+        {/* Global Case Search Input Pill */}
+        <div ref={searchRef} className="relative flex-1 max-w-md">
+          <form onSubmit={handleSearchSubmit} className="relative flex items-center">
+            <Search className="absolute left-3 h-3.5 w-3.5 text-[var(--mut)]" />
             <input
               type="text"
               value={searchQuery}
@@ -213,52 +213,52 @@ export function AgencyHeader() {
               onFocus={() => {
                 if (searchResults.length > 0) setShowSearchDropdown(true);
               }}
-              placeholder="Search Claim #, Policy #, Insured... (Enter)"
-              className="w-full pl-9 pr-14 py-1.5 bg-slate-100/80 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-900 focus:bg-white dark:focus:bg-slate-900 text-xs text-slate-800 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl border border-slate-200/80 dark:border-slate-800 focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition font-sans"
+              placeholder="Search case, claim, policy, UTR, AWB..."
+              className="w-full pl-9 pr-14 py-1.5 bg-transparent text-xs text-[var(--txt)] placeholder:text-[var(--mut)] rounded-full focus:outline-none focus:ring-1 focus:ring-[var(--ice)] transition font-sans"
             />
-            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono-code font-semibold px-1 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-400 dark:text-slate-500 shadow-2xs">
-              ↵
+            <div className="absolute right-2 text-[10px] font-mono-code font-semibold px-1.5 py-0.5 border border-[var(--line)] rounded-md text-[var(--mut)] shadow-2xs pointer-events-none">
+              ⌘K
             </div>
           </form>
 
           {/* Real-time Global Search Dropdown */}
           {showSearchDropdown && (
-            <div className="absolute left-0 right-0 top-full mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl overflow-hidden z-50 py-1 max-h-96 overflow-y-auto">
+            <div className="absolute left-0 right-0 top-full mt-2 glass rounded-2xl shadow-2xl overflow-hidden z-50 py-1.5 max-h-96 overflow-y-auto">
               {isSearching ? (
-                <div className="p-3 text-xs text-slate-400 text-center flex items-center justify-center space-x-1.5">
-                  <div className="h-3 w-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-                  <span>Searching across agency records...</span>
+                <div className="p-3 text-xs text-[var(--mut)] text-center flex items-center justify-center space-x-1.5">
+                  <div className="h-3 w-3 border-2 border-[var(--ice)] border-t-transparent rounded-full animate-spin" />
+                  <span>Searching agency database...</span>
                 </div>
               ) : searchResults.length === 0 ? (
-                <div className="p-3 text-xs text-slate-400 text-center">
+                <div className="p-3 text-xs text-[var(--mut)] text-center">
                   No matching records found for &quot;{searchQuery}&quot;
                 </div>
               ) : (
                 <>
-                  <div className="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800">
+                  <div className="px-3 py-1 text-[10px] font-bold text-[var(--mut)] uppercase tracking-wider border-b border-[var(--line)]">
                     Results ({searchResults.length})
                   </div>
                   {searchResults.map((item) => (
                     <button
                       key={`${item.entity_type}-${item.entity_id}`}
                       onClick={() => handleSelectResult(item)}
-                      className="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between text-xs transition border-b border-slate-50 dark:border-slate-800/40 last:border-none"
+                      className="w-full text-left px-3 py-2 hover:bg-[var(--glass2)] flex items-center justify-between text-xs transition border-b border-[var(--line)] last:border-none"
                     >
                       <div className="min-w-0 pr-2">
                         <div className="flex items-center space-x-1.5">
                           <EntityBadge type={item.entity_type} />
-                          <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">
+                          <span className="font-semibold text-[var(--txt)] truncate">
                             {item.title}
                           </span>
                           {item.doc_code && (
-                            <span className="font-mono-code text-[11px] text-blue-600 dark:text-blue-400">
+                            <span className="font-mono-code text-[11px] text-[var(--gold)] font-bold">
                               [{item.doc_code}]
                             </span>
                           )}
                         </div>
-                        <p className="text-[11px] text-slate-500 truncate mt-0.5">{item.subtitle}</p>
+                        <p className="text-[11px] text-[var(--mut)] truncate mt-0.5">{item.subtitle}</p>
                       </div>
-                      <ExternalLink className="h-3 w-3 text-slate-400 shrink-0" />
+                      <ExternalLink className="h-3 w-3 text-[var(--mut)] shrink-0" />
                     </button>
                   ))}
                 </>
@@ -269,31 +269,31 @@ export function AgencyHeader() {
       </div>
 
       {/* Middle Operations Live Indicator (Hidden on mobile) */}
-      <div className="hidden lg:flex items-center space-x-3 text-xs">
-        <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-slate-50/90 dark:bg-slate-900/90 border border-slate-200/90 dark:border-slate-800/90 rounded-lg text-slate-600 dark:text-slate-300 font-mono-code text-[11px] shadow-2xs">
-          <Clock className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-          <span className="font-semibold text-slate-700 dark:text-slate-200">IST:</span>
+      <div className="hidden lg:flex items-center space-x-2 text-xs">
+        <div className="flex items-center space-x-1.5 px-3 py-1 bg-[var(--glass2)] border border-[var(--line)] rounded-full text-[var(--mut)] font-mono-code text-[11px]">
+          <Clock className="h-3 w-3 text-[var(--ice)]" />
+          <span className="font-semibold text-[var(--txt)]">IST:</span>
           <span>{time || '--:--:--'}</span>
         </div>
 
-        <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-emerald-50/90 dark:bg-emerald-950/60 border border-emerald-200/90 dark:border-emerald-800/80 rounded-lg text-emerald-700 dark:text-emerald-400 text-[11px] font-medium shadow-2xs">
-          <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-          <span>Tenancy & RLS Enforced</span>
+        <div className="flex items-center space-x-1.5 px-3 py-1 bg-[var(--glass2)] border border-[var(--line)] rounded-full text-[var(--ok)] text-[11px] font-semibold">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--ok)] animate-pulse" />
+          <span>Tenancy &amp; RLS Enforced</span>
         </div>
       </div>
 
       {/* Right side: Notifications, Dark Mode Toggle & Quick Action Buttons */}
-      <div className="flex items-center space-x-2.5">
+      <div className="flex items-center space-x-2">
         {/* Notification Bell Dropdown */}
         <div ref={notifRef} className="relative">
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 bg-slate-100/80 dark:bg-slate-900/80 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-white/10 transition"
+            className="relative p-2 rounded-full text-[var(--mut)] hover:text-[var(--txt)] bg-[var(--glass2)] border border-[var(--line)] hover:bg-[var(--glass)] transition"
             title="Notifications"
           >
-            <Bell className="h-4 w-4" />
+            <Bell className="h-3.5 w-3.5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 h-4 w-4 bg-rose-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center animate-pulse">
+              <span className="absolute -top-0.5 -right-0.5 h-3.5 w-3.5 bg-[var(--bad)] text-white rounded-full text-[9px] font-bold flex items-center justify-center animate-pulse">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -301,12 +301,12 @@ export function AgencyHeader() {
 
           {/* Notifications Dropdown Panel */}
           {showNotifications && (
-            <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden">
-              <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/30">
+            <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 glass rounded-2xl shadow-2xl z-50 overflow-hidden">
+              <div className="p-3 border-b border-[var(--line)] flex items-center justify-between bg-[var(--glass2)]">
                 <div className="flex items-center space-x-1.5">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">Notifications</span>
+                  <span className="text-xs font-bold text-[var(--txt)]">Notifications</span>
                   {unreadCount > 0 && (
-                    <span className="px-1.5 py-0.2 bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 rounded text-[10px] font-semibold">
+                    <span className="px-1.5 py-0.2 bg-[var(--ice)] text-white rounded-full text-[10px] font-semibold">
                       {unreadCount} new
                     </span>
                   )}
@@ -314,37 +314,37 @@ export function AgencyHeader() {
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllRead}
-                    className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                    className="text-[11px] text-[var(--ice)] hover:underline font-medium"
                   >
                     Mark all read
                   </button>
                 )}
               </div>
 
-              <div className="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+              <div className="max-h-80 overflow-y-auto divide-y divide-[var(--line)]">
                 {notifications.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-slate-400">No notifications yet</div>
+                  <div className="p-6 text-center text-xs text-[var(--mut)]">No notifications yet</div>
                 ) : (
                   notifications.map((n) => (
                     <div
                       key={n.id}
                       onClick={() => markSingleRead(n.id, n.action_url)}
-                      className={`p-3 text-xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 transition ${
-                        !n.is_read ? 'bg-blue-50/40 dark:bg-blue-950/20' : ''
+                      className={`p-3 text-xs cursor-pointer hover:bg-[var(--glass2)] transition ${
+                        !n.is_read ? 'bg-[var(--glass2)]' : ''
                       }`}
                     >
                       <div className="flex items-start justify-between gap-1">
-                        <span className={`font-semibold text-slate-800 dark:text-slate-200 ${!n.is_read ? 'text-blue-600 dark:text-blue-400' : ''}`}>
+                        <span className={`font-semibold ${!n.is_read ? 'text-[var(--ice)]' : 'text-[var(--txt)]'}`}>
                           {n.title}
                         </span>
                         {!n.is_read && (
-                          <span className="h-1.5 w-1.5 rounded-full bg-blue-600 shrink-0 mt-1" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--ice)] shrink-0 mt-1" />
                         )}
                       </div>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 line-clamp-2">
+                      <p className="text-[11px] text-[var(--mut)] mt-0.5 line-clamp-2">
                         {n.message}
                       </p>
-                      <span className="text-[9px] text-slate-400 mt-1 block">
+                      <span className="text-[9px] text-[var(--mut)] mt-1 block">
                         {new Date(n.created_at).toLocaleTimeString('en-IN', {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -358,23 +358,23 @@ export function AgencyHeader() {
           )}
         </div>
 
-        {/* Luxury Dark Mode Switch */}
+        {/* Theme Switch */}
         <ThemeToggle />
 
         <Link
           href="/invoicing"
-          className="btn-3d flex items-center space-x-1.5 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100/80 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/60 rounded-xl text-xs font-semibold transition"
+          className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-[var(--glass2)] hover:bg-[var(--glass)] text-[var(--txt)] border border-[var(--line)] rounded-full text-xs font-semibold transition"
         >
-          <Receipt className="h-3.5 w-3.5 text-amber-700 dark:text-amber-400" />
-          <span className="hidden sm:inline">New Invoice</span>
+          <Receipt className="h-3.5 w-3.5 text-[var(--gold)]" />
+          <span>Invoice</span>
         </Link>
 
         <Link
           href="/cases"
-          className="btn-3d flex items-center space-x-1.5 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-blue-500/25 transition"
+          className="flex items-center space-x-1.5 px-3.5 py-1.5 bg-gradient-to-r from-[#e9cd8d] to-[#b48a3c] text-[#2a1d05] rounded-full text-xs font-bold shadow-[0_6px_14px_-4px_rgba(180,138,60,0.6)] hover:brightness-105 transition"
         >
-          <Plus className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Intake Case</span>
+          <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+          <span>Intake</span>
         </Link>
       </div>
     </header>

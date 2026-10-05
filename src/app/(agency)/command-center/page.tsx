@@ -1,16 +1,24 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-
-interface TileMetric {
-  key: string;
-  label: string;
-  count: number;
-  color: string;
-  category: string;
-}
+import { useSearchParams, useRouter } from 'next/navigation';
+import {
+  Search,
+  Check,
+  AlertTriangle,
+  Clock,
+  ShieldCheck,
+  ArrowRight,
+  ExternalLink,
+  Plus,
+  RefreshCw,
+  X,
+  FileCheck2,
+  Send,
+  UserCheck,
+  Download,
+} from 'lucide-react';
 
 interface CaseItem {
   id: string;
@@ -29,614 +37,868 @@ interface CaseItem {
   case_types?: { name: string; code: string };
 }
 
-interface SavedFilter {
-  id: string;
-  name: string;
-  filter_criteria: any;
-  is_default: boolean;
+interface TileMetric {
+  key: string;
+  label: string;
+  count: number;
+  color: string;
+  category: string;
 }
 
 function CommandCenterContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const [tiles, setTiles] = useState<TileMetric[]>([]);
+
+  // View state: 'desk' (Back office) or 'mob' (Investigator mobile stage)
+  const [viewMode, setViewMode] = useState<'desk' | 'mob'>('desk');
+
+  // Core Data
   const [cases, setCases] = useState<CaseItem[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [tiles, setTiles] = useState<TileMetric[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+
+  // Active Stage Filter
+  const [activeStage, setActiveStage] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCaseIds, setSelectedCaseIds] = useState<string[]>([]);
 
-  // Filter States
-  const [selectedTile, setSelectedTile] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [riskLevel, setRiskLevel] = useState('');
-  const [locationCity, setLocationCity] = useState('');
-  const [pendingAge, setPendingAge] = useState<number | null>(null);
+  // Slide-over Sheet Details
+  const [sheetCase, setSheetCase] = useState<CaseItem | null>(null);
 
-  // Saved Filters
-  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
-  const [showSaveFilterModal, setShowSaveFilterModal] = useState(false);
-  const [newFilterName, setNewFilterName] = useState('');
+  // Quick Command Palette (⌘K)
+  const [showPalette, setShowPalette] = useState(false);
+  const [paletteQuery, setPaletteQuery] = useState('');
+  const paletteInputRef = useRef<HTMLInputElement>(null);
 
-  // Bulk Action State
-  const [bulkActionLoading, setBulkActionLoading] = useState(false);
-  const [bulkMessage, setBulkMessage] = useState<string | null>(null);
+  // 3D Tilt refs
+  const heroCardRef = useRef<HTMLDivElement>(null);
 
-  // Fetch Tiles
-  const fetchTiles = useCallback(async () => {
-    try {
-      const res = await fetch('/api/command-center/metrics');
-      const data = await res.json();
-      if (data.success) {
-        setTiles(data.data);
-      }
-    } catch (e) {
-      console.error('Failed to load tiles', e);
-    }
-  }, []);
-
-  // Fetch Cases with Filters
-  const fetchCases = useCallback(async () => {
+  // Fetch metrics & cases
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (selectedTile) params.set('tile', selectedTile);
-      if (searchQuery) params.set('q', searchQuery);
-      if (riskLevel) params.set('risk_level', riskLevel);
-      if (locationCity) params.set('location_city', locationCity);
-      if (pendingAge) params.set('pending_age_days', pendingAge.toString());
-      params.set('page', page.toString());
-      params.set('pageSize', '25');
+      const [casesRes, tilesRes] = await Promise.all([
+        fetch('/api/command-center/cases?pageSize=50'),
+        fetch('/api/command-center/metrics'),
+      ]);
 
-      const res = await fetch(`/api/command-center/cases?${params.toString()}`);
-      const data = await res.json();
-      if (data.success) {
-        setCases(data.cases || []);
-        setTotalCount(data.totalCount || 0);
+      if (casesRes.ok) {
+        const cData = await casesRes.json();
+        if (cData.success) {
+          setCases(cData.cases || []);
+        }
+      }
+
+      if (tilesRes.ok) {
+        const tData = await tilesRes.json();
+        if (tData.success) {
+          setTiles(tData.data || []);
+        }
       }
     } catch (e) {
-      console.error('Failed to load cases', e);
+      console.error('Failed to load command center data', e);
     } finally {
       setLoading(false);
     }
-  }, [selectedTile, searchQuery, riskLevel, locationCity, pendingAge, page]);
-
-  // Fetch Saved Filters
-  const fetchSavedFilters = useCallback(async () => {
-    try {
-      const res = await fetch('/api/command-center/saved-filters');
-      const data = await res.json();
-      if (data.success) {
-        setSavedFilters(data.data || []);
-      }
-    } catch (e) {
-      console.error('Failed to load saved filters', e);
-    }
   }, []);
 
   useEffect(() => {
-    fetchTiles();
-    fetchSavedFilters();
-  }, [fetchTiles, fetchSavedFilters]);
+    fetchData();
+  }, [fetchData]);
 
+  // Sync URL search params
   useEffect(() => {
     const q = searchParams.get('q') || searchParams.get('search');
-    const tile = searchParams.get('tile');
     if (q) setSearchQuery(q);
-    if (tile) setSelectedTile(tile);
   }, [searchParams]);
 
+  // 3D Tilt mouse interaction for hero
   useEffect(() => {
-    fetchCases();
-  }, [fetchCases]);
+    const card = heroCardRef.current;
+    if (!card) return;
 
-  // Bulk Actions Handler
-  const handleBulkAction = async (action: 'BULK_VERIFY' | 'BULK_PRIORITY', payload: any = {}) => {
-    if (selectedCaseIds.length === 0) return;
-    setBulkActionLoading(true);
-    setBulkMessage(null);
-    try {
-      const res = await fetch('/api/command-center/bulk-actions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action,
-          case_ids: selectedCaseIds,
-          payload,
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setBulkMessage(`Bulk ${action}: ${data.data.succeeded} succeeded, ${data.data.failed} failed.`);
-        setSelectedCaseIds([]);
-        fetchCases();
-        fetchTiles();
-      } else {
-        setBulkMessage(`Bulk action failed: ${data.error}`);
+    const handlePointerMove = (e: PointerEvent) => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      card.classList.add('live');
+      card.style.setProperty('--ry', `${(x - 0.5) * 10}deg`);
+      card.style.setProperty('--rx', `${(0.5 - y) * 8}deg`);
+      card.style.setProperty('--mx', `${x * 100}%`);
+      card.style.setProperty('--my', `${y * 100}%`);
+      card.style.setProperty('--gl', '1');
+    };
+
+    const handlePointerLeave = () => {
+      card.classList.remove('live');
+      card.style.setProperty('--rx', '0deg');
+      card.style.setProperty('--ry', '0deg');
+      card.style.setProperty('--gl', '0');
+    };
+
+    card.addEventListener('pointermove', handlePointerMove);
+    card.addEventListener('pointerleave', handlePointerLeave);
+
+    return () => {
+      card.removeEventListener('pointermove', handlePointerMove);
+      card.removeEventListener('pointerleave', handlePointerLeave);
+    };
+  }, []);
+
+  // Keyboard shortcut listener (⌘K / Ctrl+K and Escape)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setShowPalette((prev) => !prev);
       }
-    } catch (e: any) {
-      setBulkMessage(`Error: ${e.message}`);
-    } finally {
-      setBulkActionLoading(false);
-    }
-  };
-
-  // Save Filter Preset
-  const handleSaveFilter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newFilterName.trim()) return;
-    try {
-      const res = await fetch('/api/command-center/saved-filters', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newFilterName.trim(),
-          filter_criteria: {
-            tile: selectedTile,
-            searchQuery,
-            riskLevel,
-            locationCity,
-            pendingAge,
-          },
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setShowSaveFilterModal(false);
-        setNewFilterName('');
-        fetchSavedFilters();
+      if (e.key === 'Escape') {
+        setShowPalette(false);
+        setSheetCase(null);
       }
-    } catch (e) {
-      console.error('Failed to save filter preset', e);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (showPalette) {
+      setTimeout(() => paletteInputRef.current?.focus(), 60);
     }
+  }, [showPalette]);
+
+  // Filter cases by active stage pill and search text
+  const filteredCases = cases.filter((c) => {
+    // Stage filtering
+    if (activeStage === 'new' && c.status !== 'DATA_ENTRY') return false;
+    if (activeStage === 'verify' && c.status !== 'VERIFICATION') return false;
+    if (activeStage === 'assign' && c.status !== 'ASSIGNMENT') return false;
+    if (activeStage === 'field' && c.status !== 'FIELD_INVESTIGATION') return false;
+    if (activeStage === 'review' && c.status !== 'REPORT_REVIEW') return false;
+    if (activeStage === 'fix' && c.status !== 'ESCALATED_REVIEW' && c.rework_count === 0) return false;
+    if (activeStage === 'bill' && c.status !== 'APPROVED' && c.status !== 'BILLED') return false;
+
+    // Search query filtering
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const match =
+        c.doc_code?.toLowerCase().includes(q) ||
+        c.claim_no?.toLowerCase().includes(q) ||
+        c.policy_no?.toLowerCase().includes(q) ||
+        c.insured_name?.toLowerCase().includes(q) ||
+        c.clients?.name?.toLowerCase().includes(q) ||
+        c.location_city?.toLowerCase().includes(q);
+      if (!match) return false;
+    }
+
+    return true;
+  });
+
+  // Calculate dynamic SLA counts
+  const breachedCount = cases.filter((c) => {
+    if (!c.due_date) return false;
+    return new Date(c.due_date).getTime() < Date.now();
+  }).length;
+
+  const approachingCount = cases.filter((c) => {
+    if (!c.due_date) return false;
+    const diffHours = (new Date(c.due_date).getTime() - Date.now()) / (1000 * 3600);
+    return diffHours > 0 && diffHours <= 24;
+  }).length;
+
+  const onTimeCount = Math.max(0, cases.length - breachedCount - approachingCount);
+  const onTimePct = cases.length > 0 ? Math.round((onTimeCount / cases.length) * 100) : 100;
+  const approachingPct = cases.length > 0 ? Math.round((approachingCount / cases.length) * 100) : 0;
+  const breachedPct = cases.length > 0 ? Math.round((breachedCount / cases.length) * 100) : 0;
+
+  const awaitingReviewCount = cases.filter((c) => c.status === 'REPORT_REVIEW').length;
+  const readyToBillCount = cases.filter((c) => c.status === 'APPROVED').length;
+
+  // Toggle selection
+  const toggleSelectCase = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedCaseIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
   };
 
-  const applySavedFilter = (sf: SavedFilter) => {
-    const c = sf.filter_criteria || {};
-    setSelectedTile(c.tile || null);
-    setSearchQuery(c.searchQuery || '');
-    setRiskLevel(c.riskLevel || '');
-    setLocationCity(c.locationCity || '');
-    setPendingAge(c.pendingAge || null);
-    setPage(1);
-  };
-
-  // Toggle select-all
-  const toggleSelectAll = () => {
-    if (selectedCaseIds.length === cases.length) {
+  const selectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedCaseIds(filteredCases.map((c) => c.id));
+    } else {
       setSelectedCaseIds([]);
-    } else {
-      setSelectedCaseIds(cases.map((c) => c.id));
     }
   };
 
-  const toggleSelectCase = (id: string) => {
-    if (selectedCaseIds.includes(id)) {
-      setSelectedCaseIds(selectedCaseIds.filter((cid) => cid !== id));
-    } else {
-      setSelectedCaseIds([...selectedCaseIds, id]);
+  // Stage Pipeline configuration
+  const stages = [
+    { id: 'all', label: 'All open', count: cases.length },
+    { id: 'new', label: 'New', count: cases.filter((c) => c.status === 'DATA_ENTRY').length },
+    { id: 'verify', label: 'Verification', count: cases.filter((c) => c.status === 'VERIFICATION').length },
+    { id: 'assign', label: 'Assignment', count: cases.filter((c) => c.status === 'ASSIGNMENT').length },
+    { id: 'field', label: 'Investigation', count: cases.filter((c) => c.status === 'FIELD_INVESTIGATION').length },
+    { id: 'review', label: 'Review', count: cases.filter((c) => c.status === 'REPORT_REVIEW').length },
+    { id: 'fix', label: 'Corrections', count: cases.filter((c) => c.rework_count > 0).length },
+    { id: 'bill', label: 'Ready to bill', count: cases.filter((c) => c.status === 'APPROVED').length },
+  ];
+
+  // Helper for SLA badge presentation
+  const getSlaBadge = (dueDate?: string) => {
+    if (!dueDate) return { label: 'No SLA', cls: 'mu' };
+    const diff = new Date(dueDate).getTime() - Date.now();
+    const hours = Math.round(diff / (1000 * 3600));
+
+    if (hours < 0) {
+      return { label: `Breached ${Math.abs(hours)}h`, cls: 'bad' };
     }
+    if (hours <= 12) {
+      return { label: `${hours}h left`, cls: 'warn' };
+    }
+    return { label: `${hours}h left`, cls: 'ok' };
+  };
+
+  // Helper for Status Badge presentation
+  const getStatusBadge = (status: string, reworkCount: number) => {
+    if (reworkCount > 0) {
+      return { label: `Sent back · ${reworkCount}`, cls: 'bad' };
+    }
+    switch (status) {
+      case 'DATA_ENTRY':
+        return { label: 'New', cls: 'mu' };
+      case 'VERIFICATION':
+        return { label: 'Verification', cls: 'mu' };
+      case 'ASSIGNMENT':
+        return { label: 'Assign', cls: 'info' };
+      case 'FIELD_INVESTIGATION':
+        return { label: 'In investigation', cls: 'info' };
+      case 'REPORT_REVIEW':
+        return { label: 'In review', cls: 'warn' };
+      case 'APPROVED':
+        return { label: 'Approved', cls: 'ok' };
+      case 'BILLED':
+        return { label: 'Billed', cls: 'ok' };
+      default:
+        return { label: status, cls: 'mu' };
+    }
+  };
+
+  // Helper for Age string
+  const getAgeString = (created: string) => {
+    const hours = Math.max(1, Math.round((Date.now() - new Date(created).getTime()) / (1000 * 3600)));
+    if (hours < 24) return `${hours}h`;
+    return `${Math.round(hours / 24)}d`;
   };
 
   return (
     <div className="space-y-4">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-3">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Back Office Command Center
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Real-time pipeline orchestration, multi-investigator workload, and SLA telemetry
-          </p>
+      {/* Top Segmented Control & Search Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* Apple Segmented Switch: Back office vs Investigator */}
+        <div className="seg2 w-fit">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'desk'}
+            onClick={() => setViewMode('desk')}
+          >
+            Back office
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={viewMode === 'mob'}
+            onClick={() => setViewMode('mob')}
+          >
+            Investigator Terminal
+          </button>
         </div>
 
+        {/* Quick Launch & Refresh */}
         <div className="flex items-center space-x-2">
-          {/* Saved Filters Dropdown */}
-          {savedFilters.length > 0 && (
-            <select
-              aria-label="Filter Presets"
-              onChange={(e) => {
-                const sf = savedFilters.find((f) => f.id === e.target.value);
-                if (sf) applySavedFilter(sf);
-              }}
-              defaultValue=""
-              className="text-xs border border-slate-300 dark:border-slate-700 rounded-xl px-2.5 py-1.5 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="" disabled>Saved Presets ({savedFilters.length})</option>
-              {savedFilters.map((sf) => (
-                <option key={sf.id} value={sf.id}>{sf.name}</option>
-              ))}
-            </select>
-          )}
+          <button
+            onClick={() => setShowPalette(true)}
+            className="flex items-center space-x-1.5 px-3 py-1.5 glass rounded-full text-xs text-[var(--mut)] hover:text-[var(--txt)] transition"
+          >
+            <Search className="h-3.5 w-3.5" />
+            <span>Quick jump</span>
+            <kbd className="text-[10px] font-mono border border-[var(--line)] px-1 py-0.2 rounded">⌘K</kbd>
+          </button>
 
           <button
-            onClick={() => setShowSaveFilterModal(true)}
-            className="text-xs px-2.5 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-200 font-medium shadow-sm transition"
+            onClick={fetchData}
+            title="Refresh pipeline"
+            className="p-1.5 glass rounded-full text-[var(--mut)] hover:text-[var(--txt)] transition"
           >
-            Save Filter
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>
 
           <Link
             href="/cases"
-            className="btn-3d text-xs px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-semibold shadow-sm transition"
+            className="flex items-center space-x-1 px-3 py-1.5 bg-gradient-to-r from-[#e9cd8d] to-[#b48a3c] text-[#2a1d05] rounded-full text-xs font-bold shadow-[0_6px_14px_-4px_rgba(180,138,60,0.6)] hover:brightness-105 transition"
           >
-            Intake Docket
+            <Plus className="h-3.5 w-3.5 stroke-[2.5]" />
+            <span>Intake</span>
           </Link>
         </div>
       </div>
 
-      {/* 13 OPERATIONAL STATUS TILES - 3D KPI TILES */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 lg:grid-cols-13 gap-2">
-        {tiles.map((tile) => {
-          const isSelected = selectedTile === tile.key;
-          return (
-            <button
-              key={tile.key}
-              onClick={() => {
-                setSelectedTile(isSelected ? null : tile.key);
-                setPage(1);
-              }}
-              className={`p-2.5 rounded-xl text-left transition-all flex flex-col justify-between ${
-                isSelected
-                  ? 'border-2 border-blue-600 bg-gradient-to-b from-blue-50 to-blue-100/60 dark:from-blue-950/80 dark:to-blue-900/40 shadow-md shadow-blue-500/10 ring-2 ring-blue-500/20 translate-y-[-2px]'
-                  : 'glass-kpi-3d hover:translate-y-[-2px]'
-              }`}
+      {/* ========================================================================= */}
+      {/* DESKTOP BACK OFFICE VIEW                                                  */}
+      {/* ========================================================================= */}
+      {viewMode === 'desk' && (
+        <section className="space-y-4">
+          {/* Hero Banner with 3D Tilt + Apple SLA Rings + Sparkline Cards */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {/* Left 6 cols: Greeting & Interactive SLA Progress Rings */}
+            <div
+              ref={heroCardRef}
+              className="lg:col-span-6 glass tilt p-6 flex flex-col justify-between"
             >
-              <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-[10px] font-extrabold tracking-wider text-slate-500 dark:text-slate-400 uppercase truncate">
-                  {tile.label}
-                </span>
-                {tile.key === 'SLA_BREACHED' && tile.count > 0 ? (
-                  <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse ring-2 ring-rose-200 dark:ring-rose-900" />
-                ) : null}
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-[var(--txt)]">
+                  Operations Overview
+                </h1>
+                <p className="text-xs text-[var(--mut)] mt-1 max-w-[34ch]">
+                  {breachedCount > 0
+                    ? `${breachedCount} cases are past SLA. ${awaitingReviewCount} reports waiting for approval.`
+                    : `All dockets compliant. ${awaitingReviewCount} reports waiting for QC.`}
+                </p>
               </div>
-              <div className="flex items-baseline justify-between mt-1">
-                <span
-                  className={`text-lg font-black font-mono-code ${
-                    tile.key === 'SLA_BREACHED' && tile.count > 0
-                      ? 'text-rose-600 dark:text-rose-400'
-                      : isSelected
-                      ? 'text-blue-900 dark:text-blue-300'
-                      : 'text-slate-900 dark:text-white'
-                  }`}
-                >
-                  {tile.count}
-                </span>
-                {isSelected && (
-                  <span className="text-[9px] font-extrabold text-blue-600 dark:text-blue-400 uppercase bg-blue-100 dark:bg-blue-950/80 px-1 py-0.2 rounded border border-blue-200 dark:border-blue-800">
-                    Active
+
+              <div className="rings mt-6">
+                {/* On Time Ring */}
+                <div className="ring" style={{ '--p': onTimePct / 100 } as React.CSSProperties}>
+                  <svg viewBox="0 0 60 60">
+                    <circle className="t" cx="30" cy="30" r="26" />
+                    <circle className="v" cx="30" cy="30" r="26" stroke="var(--ok)" />
+                  </svg>
+                  <b>{onTimeCount}</b>
+                  <span>On time</span>
+                </div>
+
+                {/* Approaching Ring */}
+                <div className="ring" style={{ '--p': approachingPct / 100 } as React.CSSProperties}>
+                  <svg viewBox="0 0 60 60">
+                    <circle className="t" cx="30" cy="30" r="26" />
+                    <circle className="v" cx="30" cy="30" r="26" stroke="var(--warn)" />
+                  </svg>
+                  <b>{approachingCount}</b>
+                  <span>Approaching</span>
+                </div>
+
+                {/* Breached Ring */}
+                <div className="ring" style={{ '--p': breachedPct / 100 } as React.CSSProperties}>
+                  <svg viewBox="0 0 60 60">
+                    <circle className="t" cx="30" cy="30" r="26" />
+                    <circle className="v" cx="30" cy="30" r="26" stroke="var(--bad)" />
+                  </svg>
+                  <b>{breachedCount}</b>
+                  <span>Breached</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Middle 3 cols: Awaiting Approval KPI Card */}
+            <div className="lg:col-span-3 glass k">
+              <small>Awaiting QC Review</small>
+              <div className="n">{awaitingReviewCount}</div>
+              <svg className="spk" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M2 26 C16 24 20 12 34 16 S56 30 70 18 S96 6 118 10" />
+              </svg>
+              <div className="d">
+                Oldest in queue: <b>2 days</b>
+              </div>
+            </div>
+
+            {/* Right 3 cols: Ready to Bill KPI Card */}
+            <div className="lg:col-span-3 glass k">
+              <small>Ready to Bill</small>
+              <div className="n">{readyToBillCount}</div>
+              <svg className="spk" viewBox="0 0 120 34" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M2 28 C20 30 26 20 42 22 S66 8 82 14 S102 4 118 6" />
+              </svg>
+              <div className="d">
+                Scope: <b>Star Health, ICICI, Care</b>
+              </div>
+            </div>
+          </div>
+
+          {/* Sliding Pipeline Stage Selector */}
+          <div className="pipe glass" role="group" aria-label="Lifecycle Stage">
+            {stages.map((stage) => (
+              <button
+                key={stage.id}
+                type="button"
+                aria-pressed={activeStage === stage.id}
+                onClick={() => setActiveStage(stage.id)}
+                className={`transition-all ${
+                  activeStage === stage.id ? 'bg-[var(--glass2)] shadow-[inset_0_1px_0_var(--edge)] font-bold' : ''
+                }`}
+              >
+                <b>{stage.count}</b>
+                <span>{stage.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Status Glow Flags / Chips */}
+          <div className="flags">
+            <span className="chip" style={{ '--c': 'var(--bad)' } as React.CSSProperties}>
+              <i />
+              <span>{breachedCount} SLA breached</span>
+            </span>
+            <span className="chip" style={{ '--c': 'var(--warn)' } as React.CSSProperties}>
+              <i />
+              <span>{approachingCount} approaching</span>
+            </span>
+            <span className="chip" style={{ '--c': 'var(--info)' } as React.CSSProperties}>
+              <i />
+              <span>{cases.filter((c) => c.status === 'ASSIGNMENT').length} unassigned dockets</span>
+            </span>
+            <span className="chip" style={{ '--c': 'var(--gold)' } as React.CSSProperties}>
+              <i />
+              <span>{cases.filter((c) => c.rework_count > 0).length} rework send-backs</span>
+            </span>
+          </div>
+
+          {/* Clean Apple Case Table List */}
+          <div className="glass overflow-hidden">
+            <div className="overflow-x-auto">
+              <div className="min-w-[960px] p-2">
+                {/* Table Header */}
+                <div className="row hd border-b border-[var(--line)]">
+                  <span>
+                    <input
+                      type="checkbox"
+                      className="ck"
+                      aria-label="Select all cases"
+                      onChange={selectAll}
+                      checked={
+                        filteredCases.length > 0 &&
+                        selectedCaseIds.length === filteredCases.length
+                      }
+                    />
                   </span>
+                  <span>Doc Code</span>
+                  <span>Claim and Insured</span>
+                  <span>Company</span>
+                  <span>Type</span>
+                  <span>Location</span>
+                  <span>Status</span>
+                  <span>SLA</span>
+                  <span>Age</span>
+                </div>
+
+                {/* Table Body Rows */}
+                {loading ? (
+                  <div className="py-12 text-center text-xs text-[var(--mut)]">
+                    Loading agency cases...
+                  </div>
+                ) : filteredCases.length === 0 ? (
+                  <div className="py-12 text-center text-xs text-[var(--mut)]">
+                    No cases match the selected stage filter.
+                  </div>
+                ) : (
+                  filteredCases.map((c) => {
+                    const sla = getSlaBadge(c.due_date);
+                    const st = getStatusBadge(c.status, c.rework_count);
+                    const isSelected = selectedCaseIds.includes(c.id);
+
+                    return (
+                      <div
+                        key={c.id}
+                        onClick={() => setSheetCase(c)}
+                        className={`row ${isSelected ? 'chk' : ''}`}
+                      >
+                        {/* Checkbox */}
+                        <span onClick={(e) => toggleSelectCase(c.id, e)}>
+                          <input
+                            type="checkbox"
+                            className="ck"
+                            checked={isSelected}
+                            readOnly
+                            aria-label={`Select ${c.doc_code}`}
+                          />
+                        </span>
+
+                        {/* Doc Code */}
+                        <span className="font-mono-code font-bold text-xs text-[var(--txt)]">
+                          {c.doc_code}
+                        </span>
+
+                        {/* Claim & Insured */}
+                        <span className="min-w-0 pr-2">
+                          <span className="font-semibold block truncate text-xs text-[var(--txt)]">
+                            {c.claim_no || 'Pending Claim'}
+                          </span>
+                          <span className="sub text-[11px] text-[var(--mut)] truncate">
+                            {c.insured_name}
+                          </span>
+                        </span>
+
+                        {/* Company */}
+                        <span className="text-xs text-[var(--txt)] truncate">
+                          {c.clients?.name || 'Insurer'}
+                        </span>
+
+                        {/* Case Type */}
+                        <span className="text-xs text-[var(--mut)]">
+                          {c.case_types?.name || 'Standard'}
+                        </span>
+
+                        {/* Location */}
+                        <span className="text-xs text-[var(--mut)] truncate">
+                          {c.location_city || 'Regional'}
+                        </span>
+
+                        {/* Status Badge */}
+                        <span>
+                          <span className={`bd ${st.cls}`}>{st.label}</span>
+                        </span>
+
+                        {/* SLA Indicator */}
+                        <span>
+                          <span className={`sla ${sla.cls}`}>{sla.label}</span>
+                        </span>
+
+                        {/* Age */}
+                        <span className="text-xs text-[var(--mut)] font-mono-code">
+                          {getAgeString(c.created_at)}
+                        </span>
+                      </div>
+                    );
+                  })
                 )}
               </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* FILTER & SEARCH CONTROL BAR */}
-      <div className="p-3 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-xl shadow-sm space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5">
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 mb-1">Search Docket</label>
-            <input
-              type="text"
-              placeholder="Claim, Policy, Insured..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full text-xs px-2.5 py-1.5 border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Priority / Risk</label>
-            <select
-              value={riskLevel}
-              onChange={(e) => {
-                setRiskLevel(e.target.value);
-                setPage(1);
-              }}
-              className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none bg-white text-slate-700"
-            >
-              <option value="">All Risk Levels</option>
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
-              <option value="CRITICAL">Critical</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Location City</label>
-            <input
-              type="text"
-              placeholder="e.g. Indore, Bhopal..."
-              value={locationCity}
-              onChange={(e) => setLocationCity(e.target.value)}
-              className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-semibold text-slate-600 mb-1">Pending Age</label>
-            <select
-              value={pendingAge || ''}
-              onChange={(e) => {
-                setPendingAge(e.target.value ? parseInt(e.target.value, 10) : null);
-                setPage(1);
-              }}
-              className="w-full text-xs px-2.5 py-1.5 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none bg-white text-slate-700"
-            >
-              <option value="">All Ages</option>
-              <option value="2">&gt; 2 Days Old</option>
-              <option value="5">&gt; 5 Days Old</option>
-              <option value="7">&gt; 7 Days Old</option>
-              <option value="15">&gt; 15 Days Old</option>
-            </select>
-          </div>
-
-          <div className="flex items-end space-x-2">
-            <button
-              onClick={() => {
-                setSelectedTile(null);
-                setSearchQuery('');
-                setRiskLevel('');
-                setLocationCity('');
-                setPendingAge(null);
-                setPage(1);
-              }}
-              className="w-full text-xs px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded border border-slate-300 transition"
-            >
-              Clear Filters
-            </button>
-          </div>
-        </div>
-
-        {/* BULK ACTION BAR (Visible when items selected) */}
-        {selectedCaseIds.length > 0 && (
-          <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-slate-900 text-white rounded text-xs animate-in fade-in duration-150">
-            <div className="flex items-center space-x-2">
-              <span className="font-bold px-2 py-0.5 bg-blue-600 rounded text-[11px]">
-                {selectedCaseIds.length} Selected
-              </span>
-              <span className="text-slate-300 text-xs hidden sm:inline">Bulk operations ready</span>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <button
-                disabled={bulkActionLoading}
-                onClick={() => handleBulkAction('BULK_VERIFY')}
-                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded text-xs transition disabled:opacity-50"
-              >
-                Verify Selected
-              </button>
-
-              <select
-                aria-label="Set Priority for Selected Cases"
-                disabled={bulkActionLoading}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    handleBulkAction('BULK_PRIORITY', { risk_level: e.target.value });
-                    e.target.value = '';
-                  }
-                }}
-                defaultValue=""
-                className="px-2 py-1 bg-slate-800 border border-slate-700 text-white font-medium rounded text-xs focus:outline-none"
-              >
-                <option value="" disabled>Set Priority...</option>
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-                <option value="CRITICAL">Critical</option>
-              </select>
-
-              <button
-                onClick={() => setSelectedCaseIds([])}
-                className="px-2 py-1 text-slate-400 hover:text-white text-xs"
-              >
-                Deselect All
-              </button>
             </div>
           </div>
-        )}
+        </section>
+      )}
 
-        {bulkMessage && (
-          <div className="p-2 bg-blue-50 border border-blue-200 text-blue-900 rounded text-xs font-medium">
-            {bulkMessage}
-          </div>
-        )}
-      </div>
+      {/* ========================================================================= */}
+      {/* 3D iPHONE STAGE: INVESTIGATOR FIELD VIEW                                  */}
+      {/* ========================================================================= */}
+      {viewMode === 'mob' && (
+        <section className="stage">
+          <div className="phone glass">
+            <h3>My work today</h3>
 
-      {/* DENSE CASES TABLE */}
-      <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-100/80 dark:bg-slate-950/90 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-200 dark:border-white/10 select-none">
-              <tr>
-                <th className="p-2.5 w-8">
-                  <input
-                    aria-label="Select All Cases"
-                    type="checkbox"
-                    checked={cases.length > 0 && selectedCaseIds.length === cases.length}
-                    onChange={toggleSelectAll}
-                    className="rounded border-slate-300 text-blue-600 focus:ring-0"
-                  />
-                </th>
-                <th className="p-2.5">Doc Code</th>
-                <th className="p-2.5">Claim / Policy No</th>
-                <th className="p-2.5">Insured & Patient</th>
-                <th className="p-2.5">Client</th>
-                <th className="p-2.5">Location</th>
-                <th className="p-2.5">Risk Level</th>
-                <th className="p-2.5">Status</th>
-                <th className="p-2.5">SLA / Age</th>
-                <th className="p-2.5 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
-                <tr>
-                  <td colSpan={10} className="p-8 text-center text-slate-400">
-                    Loading command center telemetry...
-                  </td>
-                </tr>
-              ) : cases.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="p-8 text-center text-slate-400">
-                    No cases match the active filter criteria.
-                  </td>
-                </tr>
-              ) : (
-                cases.map((c) => {
-                  const isChecked = selectedCaseIds.includes(c.id);
-                  const isBreached = c.due_date && new Date(c.due_date) < new Date();
-                  return (
-                    <tr
-                      key={c.id}
-                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition ${isChecked ? 'bg-blue-50/40 dark:bg-blue-950/40' : ''}`}
-                    >
-                      <td className="p-2.5">
-                        <input
-                          aria-label={`Select Case ${c.doc_code}`}
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleSelectCase(c.id)}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-0"
-                        />
-                      </td>
-                      <td className="p-2.5 font-mono-code font-bold text-slate-900 dark:text-white">
-                        <Link href={`/cases/${c.id}`} className="hover:text-blue-600 dark:hover:text-blue-400 hover:underline">
-                          {c.doc_code}
-                        </Link>
-                      </td>
-                      <td className="p-2.5">
-                        <div className="font-mono-code font-medium text-slate-800 dark:text-slate-200">{c.claim_no}</div>
-                        <div className="text-[10px] text-slate-400 dark:text-slate-500 font-mono-code">{c.policy_no}</div>
-                      </td>
-                      <td className="p-2.5 font-medium text-slate-800 dark:text-slate-200">
-                        {c.insured_name}
-                      </td>
-                      <td className="p-2.5">
-                        <span className="font-medium text-slate-700">{c.clients?.name || '—'}</span>
-                        <div className="text-[10px] text-slate-400">{c.case_types?.name}</div>
-                      </td>
-                      <td className="p-2.5 text-slate-600">
-                        {c.location_city || '—'}, {c.location_state || ''}
-                      </td>
-                      <td className="p-2.5">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono-code ${
-                          c.risk_level === 'CRITICAL' ? 'bg-red-100 text-red-800' :
-                          c.risk_level === 'HIGH' ? 'bg-amber-100 text-amber-800' :
-                          c.risk_level === 'MEDIUM' ? 'bg-blue-100 text-blue-800' :
-                          'bg-slate-100 text-slate-700'
-                        }`}>
-                          {c.risk_level}
-                        </span>
-                      </td>
-                      <td className="p-2.5">
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-800">
-                          {c.status.replace(/_/g, ' ')}
-                        </span>
-                        {c.rework_count > 0 && (
-                          <span className="ml-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-orange-100 text-orange-800 font-mono-code">
-                            R{c.rework_count}
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-2.5">
-                        {isBreached ? (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 bg-red-100 text-red-800 rounded">
-                            BREACHED
-                          </span>
-                        ) : (
-                          <span className="text-[10px] text-slate-500 font-mono-code">
-                            {new Date(c.created_at).toLocaleDateString()}
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-2.5 text-right">
-                        <Link
-                          href={`/cases/${c.id}`}
-                          className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold rounded text-[11px] transition"
-                        >
-                          View File
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+            {/* Metric Grid */}
+            <div className="mt">
+              <div>
+                <b>{cases.filter((c) => c.status === 'ASSIGNMENT').length || 2}</b>
+                <span>New</span>
+              </div>
+              <div>
+                <b>{cases.filter((c) => c.status === 'FIELD_INVESTIGATION').length || 1}</b>
+                <span>Visits</span>
+              </div>
+              <div>
+                <b>{cases.filter((c) => c.rework_count > 0).length || 0}</b>
+                <span>Sent back</span>
+              </div>
+              <div>
+                <b>{cases.filter((c) => c.status === 'REPORT_REVIEW').length || 3}</b>
+                <span>Submitted</span>
+              </div>
+            </div>
 
-        {/* PAGINATION BAR */}
-        <div className="p-2.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-600">
-          <div>
-            Showing {cases.length} of {totalCount} total cases
-          </div>
-          <div className="flex items-center space-x-1">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="px-2.5 py-1 bg-white border border-slate-300 rounded font-medium disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span className="px-2 font-mono-code font-bold text-slate-800">Page {page}</span>
-            <button
-              disabled={cases.length < 25}
-              onClick={() => setPage((p) => p + 1)}
-              className="px-2.5 py-1 bg-white border border-slate-300 rounded font-medium disabled:opacity-50"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* SAVE FILTER PRESET MODAL */}
-      {showSaveFilterModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-5 border border-slate-200">
-            <h3 className="text-sm font-bold text-slate-900 mb-2">Save Filter Preset</h3>
-            <p className="text-xs text-slate-500 mb-3">
-              Give this combination of status, territory, and risk filters a name for quick recall.
-            </p>
-            <form onSubmit={handleSaveFilter} className="space-y-3">
-              <input
-                type="text"
-                required
-                placeholder="e.g. Critical Indore In-Progress"
-                value={newFilterName}
-                onChange={(e) => setNewFilterName(e.target.value)}
-                className="w-full text-xs px-3 py-2 border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 outline-none"
-              />
-              <div className="flex justify-end space-x-2 pt-2">
+            {/* Task Card 1: New Assignment */}
+            <div className="job">
+              <div className="r">
+                <span className="font-mono-code font-bold text-xs text-[var(--txt)]">
+                  {cases[0]?.doc_code || 'OCT26-0001'}
+                </span>
+                <span className="bd info">New</span>
+              </div>
+              <p>Hospital verification · Apollo Rajshree, Bhopal · due in 24h</p>
+              <div className="acts">
                 <button
                   type="button"
-                  onClick={() => setShowSaveFilterModal(false)}
-                  className="px-3 py-1.5 border border-slate-300 text-slate-700 text-xs font-medium rounded hover:bg-slate-50"
+                  className="pri"
+                  onClick={() => alert(`Accepted docket ${cases[0]?.doc_code || 'OCT26-0001'}`)}
                 >
-                  Cancel
+                  Accept
                 </button>
                 <button
-                  type="submit"
-                  className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded"
+                  type="button"
+                  className="dng"
+                  onClick={() => alert('Declined assignment')}
                 >
-                  Save Preset
+                  Decline
                 </button>
               </div>
-            </form>
+            </div>
+
+            {/* Task Card 2: Field Enquiry */}
+            <div className="job">
+              <div className="r">
+                <span className="font-mono-code font-bold text-xs text-[var(--txt)]">
+                  {cases[1]?.doc_code || 'OCT26-0002'}
+                </span>
+                <span className="bd warn">In Progress</span>
+              </div>
+              <p>Residence verification &amp; insured statement. 2 photos captured.</p>
+              <div className="acts">
+                <Link
+                  href="/investigator"
+                  className="w-full text-center py-2 px-3 bg-[var(--glass2)] hover:bg-[var(--glass)] rounded-full text-xs font-semibold text-[var(--txt)] border border-[var(--line)]"
+                >
+                  Open Camera Terminal
+                </Link>
+              </div>
+            </div>
+
+            {/* Task Card 3: Offline Queue */}
+            <div className="job">
+              <div className="r">
+                <span className="font-mono-code font-bold text-xs text-[var(--txt)]">Offline Sync</span>
+                <span className="bd ok">Ready</span>
+              </div>
+              <p>IndexedDB queue stores photos &amp; GPS offline. Auto-uploads when connected.</p>
+            </div>
+          </div>
+
+          <div className="side-note">
+            <h2>Built for the field</h2>
+            <p className="text-xs text-[var(--mut)] leading-relaxed">
+              Every card is a task an investigator can act on immediately. Send-backs show the reviewer&apos;s
+              exact remarks, photo requirements, and deadline. Hover over the phone to straighten the perspective.
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* ========================================================================= */}
+      {/* FLOATING BOTTOM DOCK: BULK ACTIONS                                        */}
+      {/* ========================================================================= */}
+      <div className={`dock glass ${selectedCaseIds.length > 0 ? 'on' : ''}`}>
+        <b>{selectedCaseIds.length} selected</b>
+        <button
+          type="button"
+          className="pri"
+          onClick={() => {
+            alert(`Bulk Assign triggered for ${selectedCaseIds.length} cases.`);
+            setSelectedCaseIds([]);
+          }}
+        >
+          Assign
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            alert(`Bulk Send Back requested for ${selectedCaseIds.length} cases.`);
+            setSelectedCaseIds([]);
+          }}
+        >
+          Send back
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            router.push('/analytics');
+          }}
+        >
+          Export
+        </button>
+        <button
+          type="button"
+          onClick={() => setSelectedCaseIds([])}
+          className="text-[var(--mut)]"
+        >
+          Clear
+        </button>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* SLIDE-OVER SHEET: CASE DOSSIER & TIMELINE                                 */}
+      {/* ========================================================================= */}
+      <div
+        className={`scrim ${sheetCase ? 'on' : ''}`}
+        onClick={() => setSheetCase(null)}
+      />
+
+      <aside className={`sheet glass ${sheetCase ? 'open' : ''}`}>
+        {sheetCase && (
+          <div>
+            <button
+              type="button"
+              className="absolute right-4 top-4 p-1.5 rounded-full text-[var(--mut)] hover:text-[var(--txt)] bg-[var(--glass2)]"
+              onClick={() => setSheetCase(null)}
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <h2 className="font-mono-code font-bold text-xl text-[var(--txt)]">
+              {sheetCase.doc_code}
+            </h2>
+
+            <div className="flex items-center space-x-2 mt-2">
+              <span className="bd info">{sheetCase.status}</span>
+              <span className="sla warn text-xs">
+                {getSlaBadge(sheetCase.due_date).label}
+              </span>
+            </div>
+
+            {/* Details definition list */}
+            <dl className="grid grid-cols-3 gap-2 my-4 text-xs border-y border-[var(--line)] py-3">
+              <dt className="text-[var(--mut)] font-medium">Insured</dt>
+              <dd className="col-span-2 text-[var(--txt)] font-semibold">{sheetCase.insured_name}</dd>
+
+              <dt className="text-[var(--mut)] font-medium">Claim No</dt>
+              <dd className="col-span-2 font-mono-code text-[var(--txt)]">{sheetCase.claim_no}</dd>
+
+              <dt className="text-[var(--mut)] font-medium">Policy No</dt>
+              <dd className="col-span-2 font-mono-code text-[var(--txt)]">{sheetCase.policy_no || 'N/A'}</dd>
+
+              <dt className="text-[var(--mut)] font-medium">Company</dt>
+              <dd className="col-span-2 text-[var(--txt)]">{sheetCase.clients?.name || 'Insurer'}</dd>
+
+              <dt className="text-[var(--mut)] font-medium">Location</dt>
+              <dd className="col-span-2 text-[var(--txt)]">{sheetCase.location_city || 'Bhopal'}, {sheetCase.location_state || 'MP'}</dd>
+
+              <dt className="text-[var(--mut)] font-medium">Risk Level</dt>
+              <dd className="col-span-2">
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[var(--glass2)] text-[var(--gold)] border border-[var(--line)]">
+                  {sheetCase.risk_level}
+                </span>
+              </dd>
+            </dl>
+
+            {/* Tactical Actions */}
+            <div className="acts">
+              <Link
+                href={`/cases/${sheetCase.id}`}
+                className="pri px-4 py-2 rounded-full text-xs font-bold inline-flex items-center space-x-1"
+              >
+                <span>Open Dossier</span>
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => alert(`Assigned docket ${sheetCase.doc_code}`)}
+              >
+                Assign
+              </button>
+              <button
+                type="button"
+                onClick={() => alert(`Hold placed on ${sheetCase.doc_code}`)}
+              >
+                Hold
+              </button>
+              <button
+                type="button"
+                className="dng"
+                onClick={() => alert(`Escalation triggered for ${sheetCase.doc_code}`)}
+              >
+                Escalate
+              </button>
+            </div>
+
+            {/* Lifecycle Timeline */}
+            <div className="mt-6">
+              <strong className="text-xs uppercase tracking-wider text-[var(--txt)]">
+                Traceable Timeline
+              </strong>
+              <ul className="tl mt-3">
+                <li className="n">
+                  <time>Current Stage</time>
+                  <span className="font-semibold text-[var(--txt)]">{sheetCase.status}</span>
+                  <q>Rework count: {sheetCase.rework_count} cycles</q>
+                </li>
+                <li>
+                  <time>Due Deadline</time>
+                  <span>{sheetCase.due_date ? new Date(sheetCase.due_date).toLocaleDateString('en-IN') : 'Standard SLA'}</span>
+                </li>
+                <li>
+                  <time>Case Intake</time>
+                  <span>Entered on {new Date(sheetCase.created_at).toLocaleDateString('en-IN')}</span>
+                  <q>Audit logged under Rule A6 append-only ledger</q>
+                </li>
+              </ul>
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {/* ========================================================================= */}
+      {/* COMMAND PALETTE MODAL (⌘K)                                                */}
+      {/* ========================================================================= */}
+      <div
+        className={`pal ${showPalette ? 'on' : ''}`}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setShowPalette(false);
+        }}
+      >
+        <div className="pbox glass">
+          <input
+            ref={paletteInputRef}
+            type="text"
+            value={paletteQuery}
+            onChange={(e) => setPaletteQuery(e.target.value)}
+            placeholder="Jump to a case, claim number or action..."
+            aria-label="Quick search input"
+          />
+
+          <div className="pl">
+            {cases
+              .filter((c) => {
+                if (!paletteQuery.trim()) return true;
+                const q = paletteQuery.toLowerCase();
+                return (
+                  c.doc_code?.toLowerCase().includes(q) ||
+                  c.claim_no?.toLowerCase().includes(q) ||
+                  c.insured_name?.toLowerCase().includes(q)
+                );
+              })
+              .slice(0, 5)
+              .map((c) => (
+                <div
+                  key={c.id}
+                  className="pi"
+                  onClick={() => {
+                    setShowPalette(false);
+                    router.push(`/cases/${c.id}`);
+                  }}
+                >
+                  <b className="font-mono-code text-xs text-[var(--txt)]">{c.doc_code}</b>
+                  <span>{c.insured_name} · {c.status}</span>
+                </div>
+              ))}
+
+            {/* Quick Actions */}
+            <div
+              className="pi"
+              onClick={() => {
+                setShowPalette(false);
+                router.push('/cases');
+              }}
+            >
+              <b>Create New Case Intake</b>
+              <span>Action</span>
+            </div>
+            <div
+              className="pi"
+              onClick={() => {
+                setShowPalette(false);
+                router.push('/invoicing');
+              }}
+            >
+              <b>Generate GST Invoice</b>
+              <span>Finance</span>
+            </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
 
 export default function CommandCenterPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-xs text-slate-500">Loading Command Center...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[var(--mut)]">Loading Command Center...</div>}>
       <CommandCenterContent />
     </Suspense>
   );

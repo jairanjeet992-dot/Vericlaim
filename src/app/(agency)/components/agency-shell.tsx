@@ -21,7 +21,14 @@ function AgencyShellContent({
   const { isCollapsed } = useSidebar();
 
   return (
-    <div className="min-h-screen bg-slate-950 flex font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--txt)] flex font-sans selection:bg-[#4b7bec] selection:text-white relative">
+      {/* Aurora Ambient Blurred Background */}
+      <div className="aurora" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </div>
+
       {/* Left Vertical Sidebar Navigation */}
       <AgencySidebar
         context={context}
@@ -30,7 +37,7 @@ function AgencyShellContent({
 
       {/* Main Workspace (Expands smoothly when sidebar collapses) */}
       <div
-        className={`flex-1 flex flex-col min-w-0 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen overflow-x-hidden transition-all duration-300 ${
+        className={`flex-1 flex flex-col min-w-0 text-[var(--txt)] min-h-screen overflow-x-hidden transition-all duration-300 ${
           isCollapsed ? 'ml-0' : 'ml-0'
         }`}
       >
@@ -38,36 +45,36 @@ function AgencyShellContent({
         <AgencyHeader />
 
         {/* Content Body */}
-        <main className="flex-1 p-4 md:p-6 w-full max-w-[1700px] mx-auto transition-all duration-300">
+        <main className="flex-1 p-3 sm:p-5 w-full max-w-[1700px] mx-auto transition-all duration-300">
           {children}
         </main>
 
         {/* Agency Footer: Rule A10 show_branding_footer enforcement */}
-        <footer className="bg-white/80 dark:bg-slate-900/80 backdrop-blur border-t border-slate-200/90 dark:border-slate-800/90 px-6 py-3 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <footer className="glass border-t border-[var(--edge)] mx-4 mb-3 px-6 py-2.5 text-xs text-[var(--mut)] flex flex-col sm:flex-row items-center justify-between gap-2 rounded-2xl shadow-sm">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold text-slate-800 dark:text-slate-200">
+            <span className="font-semibold text-[var(--txt)]">
               {context.agency.name}
             </span>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
-            <span className="font-mono-code text-[11px] text-slate-500 dark:text-slate-400">
+            <span className="text-[var(--line)]">•</span>
+            <span className="font-mono-code text-[11px] text-[var(--mut)]">
               Agency Code: {context.agency.code}
             </span>
-            <span className="text-slate-300 dark:text-slate-700">•</span>
-            <span className="text-emerald-700 dark:text-emerald-400 font-medium text-[11px] flex items-center space-x-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[var(--line)]">•</span>
+            <span className="text-[var(--ok)] font-medium text-[11px] flex items-center space-x-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-[var(--ok)] animate-pulse" />
               <span>Multi-Tenant RLS Active</span>
             </span>
           </div>
 
           {branding?.show_branding_footer ? (
-            <div className="text-slate-400 dark:text-slate-500 font-medium text-[11px] flex items-center space-x-1.5">
+            <div className="text-[var(--mut)] font-medium text-[11px] flex items-center space-x-1.5">
               <span>Powered by</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
+              <span className="font-semibold text-[var(--txt)]">
                 Vericlaim SaaS
               </span>
             </div>
           ) : (
-            <div className="text-[10px] text-slate-300 dark:text-slate-700">
+            <div className="text-[10px] text-[var(--mut)]">
               White-label Enterprise
             </div>
           )}

@@ -160,32 +160,32 @@ export function AgencySidebar({ context }: AgencySidebarProps) {
 
   return (
     <aside
-      className={`bg-slate-950/95 text-slate-300 border-r border-slate-800/80 dark:border-white/10 flex flex-col h-screen sticky top-0 select-none z-40 transition-all duration-300 ease-in-out ${
-        isCollapsed ? 'w-16' : 'w-64'
+      className={`glass sticky top-3 my-3 ml-3 h-[calc(100vh-24px)] flex flex-col select-none z-40 transition-all duration-300 ease-in-out shrink-0 ${
+        isCollapsed ? 'w-16 p-2' : 'w-[242px] p-3'
       }`}
     >
       {/* Brand & Agency Header */}
-      <div className="p-3.5 border-b border-slate-800/80 dark:border-white/10 bg-slate-950/60 backdrop-blur flex items-center justify-between">
+      <div className={`flex items-center justify-between pb-3.5 border-b border-[var(--line)] ${isCollapsed ? 'px-1' : 'px-2'}`}>
         <div className="flex items-center space-x-2.5 min-w-0">
           <Link
             href="/dashboard"
-            className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-indigo-500 flex items-center justify-center font-black text-white shadow-lg shadow-blue-500/20 ring-1 ring-white/20 shrink-0"
+            className="w-[34px] h-[34px] rounded-[11px] bg-gradient-to-br from-[#f3dba6] via-[#a8802f] to-[#6d511a] flex items-center justify-center font-bold text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_6px_14px_-4px_rgba(150,110,30,0.6)] shrink-0 transition-transform hover:scale-105"
             title="Vericlaim SaaS"
           >
-            V
+            <span className="text-sm font-black text-[#2a1d05] drop-shadow-xs">V</span>
           </Link>
           {!isCollapsed && (
             <div className="min-w-0">
               <div className="flex items-center space-x-1.5">
-                <span className="text-sm font-black tracking-tight text-white">
-                  VERICLAIM
+                <span className="text-[14px] font-bold tracking-tight text-[var(--txt)]">
+                  Vericlaim
                 </span>
-                <span className="text-[9px] font-mono-code bg-blue-500/20 text-blue-400 px-1 py-0.2 rounded border border-blue-500/30 font-bold">
+                <span className="text-[9px] font-mono-code bg-[var(--glass2)] text-[var(--gold)] px-1.5 py-0.5 rounded-full border border-[var(--edge)] font-bold">
                   {context.agency.code}
                 </span>
               </div>
-              <div className="text-[11px] text-slate-400 truncate max-w-[130px]" title={context.agency.name}>
-                {context.agency.name}
+              <div className="text-[11px] text-[var(--mut)] truncate max-w-[130px]" title={context.agency.name}>
+                Agency console
               </div>
             </div>
           )}
@@ -195,24 +195,24 @@ export function AgencySidebar({ context }: AgencySidebarProps) {
         {!isCollapsed && (
           <button
             onClick={toggleSidebar}
-            title="Collapse Sidebar (Ctrl+B)"
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition"
+            title="Collapse Sidebar"
+            className="p-1.5 rounded-full text-[var(--mut)] hover:text-[var(--txt)] hover:bg-[var(--glass2)] transition"
           >
-            <PanelLeftClose className="h-4 w-4" />
+            <PanelLeftClose className="h-3.5 w-3.5" />
           </button>
         )}
       </div>
 
       {/* Navigation Group Items */}
-      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
+      <div className="flex-1 overflow-y-auto py-2.5 space-y-3.5 -mx-1 px-1">
         {navGroups.map((group, groupIdx) => (
           <div key={groupIdx} className="space-y-1">
             {!isCollapsed ? (
-              <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <div className="px-2.5 py-1 text-[9.5px] font-bold uppercase tracking-wider text-[var(--mut)] opacity-80">
                 {group.group}
               </div>
             ) : (
-              <div className="my-2 border-t border-slate-800/80 mx-1" />
+              <div className="my-1.5 border-t border-[var(--line)] mx-1" />
             )}
 
             <div className="space-y-0.5">
@@ -229,20 +229,20 @@ export function AgencySidebar({ context }: AgencySidebarProps) {
                     title={isCollapsed ? item.label : undefined}
                     className={`group relative flex items-center rounded-xl text-xs transition-all duration-200 ${
                       isCollapsed
-                        ? 'justify-center p-2.5'
+                        ? 'justify-center p-2'
                         : 'justify-between px-2.5 py-2'
                     } ${
                       isActive
-                        ? 'bg-gradient-to-r from-blue-600/20 via-blue-500/10 to-transparent text-white font-semibold border-l-2 border-blue-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                        ? 'bg-[var(--glass2)] text-[var(--txt)] font-semibold shadow-[inset_0_1px_0_var(--edge),0_0_0_1px_var(--line)]'
+                        : 'text-[var(--mut)] hover:text-[var(--txt)] hover:bg-[var(--glass2)] hover:translate-x-0.5'
                     }`}
                   >
                     <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2.5 min-w-0'}`}>
                       <Icon
-                        className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+                        className={`h-4 w-4 shrink-0 transition-colors duration-200 ${
                           isActive
-                            ? 'text-blue-400'
-                            : 'text-slate-500 group-hover:text-slate-300'
+                            ? 'text-[var(--gold)]'
+                            : 'text-[var(--mut)] group-hover:text-[var(--txt)]'
                         }`}
                       />
                       {!isCollapsed && (
@@ -253,15 +253,15 @@ export function AgencySidebar({ context }: AgencySidebarProps) {
                     {!isCollapsed ? (
                       item.badge ? (
                         <span
-                          className={`text-[9px] font-mono-code font-bold px-1.5 py-0.5 rounded border ${item.badgeColor}`}
+                          className={`text-[9px] font-mono-code font-bold px-1.5 py-0.5 rounded-full border ${item.badgeColor}`}
                         >
                           {item.badge}
                         </span>
                       ) : isActive ? (
-                        <ChevronRight className="h-3 w-3 text-blue-400 shrink-0" />
+                        <ChevronRight className="h-3 w-3 text-[var(--gold)] shrink-0" />
                       ) : null
                     ) : item.badge ? (
-                      <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-blue-500 ring-2 ring-slate-950" />
+                      <span className="absolute top-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
                     ) : null}
                   </Link>
                 );
@@ -272,23 +272,23 @@ export function AgencySidebar({ context }: AgencySidebarProps) {
       </div>
 
       {/* Bottom User Profile Card & Sign Out */}
-      <div className="p-2 border-t border-slate-800/80 dark:border-white/10 bg-slate-950/80">
+      <div className="pt-2 border-t border-[var(--line)]">
         {!isCollapsed ? (
-          <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 flex items-center justify-between">
-            <div className="flex items-center space-x-2.5 min-w-0">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 via-purple-600 to-pink-600 flex items-center justify-center font-bold text-xs text-white shadow-inner shrink-0">
+          <div className="p-2 rounded-2xl bg-[var(--glass2)] border border-[var(--line)] flex items-center justify-between">
+            <div className="flex items-center space-x-2 min-w-0">
+              <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-[#3b63d6] to-[#b48a3c] flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs">
                 {context.full_name?.charAt(0) || 'U'}
               </div>
               <div className="min-w-0 pr-1">
-                <div className="text-xs font-semibold text-white truncate leading-tight">
+                <div className="text-[12px] font-semibold text-[var(--txt)] truncate leading-tight">
                   {context.full_name}
                 </div>
                 <div className="flex items-center space-x-1.5 mt-0.5">
-                  <span className="text-[10px] text-slate-400 capitalize">
+                  <span className="text-[10px] text-[var(--mut)] capitalize">
                     {context.roles[0] || 'User'}
                   </span>
-                  <span className="text-slate-600">•</span>
-                  <span className="text-[9px] font-mono-code bg-slate-800 text-amber-300 px-1 py-0.2 rounded border border-slate-700">
+                  <span className="text-[var(--line)]">•</span>
+                  <span className="text-[9px] font-mono-code text-[var(--gold)] font-bold">
                     {context.scope}
                   </span>
                 </div>
@@ -299,16 +299,16 @@ export function AgencySidebar({ context }: AgencySidebarProps) {
               <button
                 type="submit"
                 title="Sign Out"
-                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition"
+                className="p-1.5 text-[var(--mut)] hover:text-[var(--bad)] hover:bg-[var(--glass)] rounded-full transition"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3.5 w-3.5" />
               </button>
             </form>
           </div>
         ) : (
           <div className="flex flex-col items-center space-y-2">
             <div
-              className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-xs text-white shadow-inner cursor-pointer"
+              className="h-8 w-8 rounded-full bg-gradient-to-tr from-[#3b63d6] to-[#b48a3c] flex items-center justify-center font-bold text-xs text-white shadow-xs cursor-pointer"
               title={`${context.full_name} (${context.roles[0] || 'User'})`}
               onClick={toggleSidebar}
             >
@@ -318,9 +318,9 @@ export function AgencySidebar({ context }: AgencySidebarProps) {
               <button
                 type="submit"
                 title="Sign Out"
-                className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-900 rounded-lg transition"
+                className="p-1.5 text-[var(--mut)] hover:text-[var(--bad)] hover:bg-[var(--glass)] rounded-full transition"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3.5 w-3.5" />
               </button>
             </form>
           </div>

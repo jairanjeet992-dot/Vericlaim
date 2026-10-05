@@ -2,176 +2,850 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================================================= */
+/* APPLE ECOSYSTEM / macOS DESIGN SYSTEM (Vericlaim Premium)                */
+/* ========================================================================= */
+
 :root {
-  --foreground-rgb: 15, 23, 42;
-  --background-rgb: 248, 250, 252;
+  --bg: #eef2f7;
+  --txt: #161a24;
+  --mut: #667086;
+  --glass: rgba(255, 255, 255, 0.65);
+  --glass2: rgba(255, 255, 255, 0.42);
+  --edge: rgba(255, 255, 255, 0.85);
+  --line: rgba(20, 28, 48, 0.08);
+  --shadow: 0 18px 50px -18px rgba(30, 44, 80, 0.22);
+  
+  --gold: #b48a3c;
+  --ice: #3b63d6;
+  --ok: #1f8f5f;
+  --warn: #c27a10;
+  --bad: #c53a3a;
+  --info: #3b63d6;
+  
+  --b1: #9db8ff;
+  --b2: #e8cf9a;
+  --b3: #b9a8ff;
+  
+  --ease: cubic-bezier(.22, .9, .24, 1);
+  --spring: cubic-bezier(.34, 1.35, .64, 1);
+  
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Inter, Roboto, system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Monaco, Consolas, monospace;
+
+  --foreground-rgb: 22, 26, 36;
+  --background-rgb: 238, 242, 247;
 }
 
-.dark {
-  --foreground-rgb: 241, 245, 249;
-  --background-rgb: 2, 6, 23;
+.dark, :root[data-theme="dark"] {
+  --bg: #0a0c12;
+  --txt: #eef1f8;
+  --mut: #8f9ab2;
+  --glass: rgba(20, 25, 38, 0.65);
+  --glass2: rgba(30, 37, 56, 0.42);
+  --edge: rgba(255, 255, 255, 0.12);
+  --line: rgba(255, 255, 255, 0.07);
+  --shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.7);
+  
+  --gold: #e3c27d;
+  --ice: #8fb0ff;
+  --ok: #5fd7a0;
+  --warn: #f2b552;
+  --bad: #ff7d78;
+  --info: #94b0ff;
+  
+  --b1: #1c2b54;
+  --b2: #4f3d1e;
+  --b3: #2d2054;
+
+  --foreground-rgb: 238, 241, 248;
+  --background-rgb: 10, 12, 18;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background-color: rgb(var(--background-rgb));
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--txt);
+  background: var(--bg);
+  font-family: var(--sans);
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
 }
 
-/* Dense professional data styles */
+button, input, select, textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* ========================================================================= */
+/* AURORA AMBIENT BACKGROUND                                                 */
+/* ========================================================================= */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora i {
+  position: absolute;
+  width: 55vw;
+  height: 55vw;
+  border-radius: 50%;
+  filter: blur(95px);
+  opacity: 0.65;
+  animation: aurora-drift 26s ease-in-out infinite alternate;
+}
+
+.aurora i:nth-child(1) {
+  background: var(--b1);
+  left: -12%;
+  top: -18%;
+}
+
+.aurora i:nth-child(2) {
+  background: var(--b2);
+  right: -14%;
+  top: 10%;
+  animation-duration: 32s;
+}
+
+.aurora i:nth-child(3) {
+  background: var(--b3);
+  left: 25%;
+  bottom: -30%;
+  animation-duration: 38s;
+}
+
+@keyframes aurora-drift {
+  to {
+    transform: translate3d(6vw, 4vh, 0) scale(1.15);
+  }
+}
+
+/* ========================================================================= */
+/* APPLE FROSTED GLASS COMPONENTS                                            */
+/* ========================================================================= */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  border: 1px solid var(--edge);
+  border-radius: 24px;
+  box-shadow: var(--shadow), inset 0 1px 0 var(--edge);
+}
+
+.glass-panel {
+  background: var(--glass);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--edge);
+}
+
+.glass-kpi-3d {
+  position: relative;
+  border-radius: 20px;
+  background: var(--glass);
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  border: 1px solid var(--edge);
+  box-shadow: var(--shadow), inset 0 1px 0 var(--edge);
+  transition: all 0.35s var(--ease);
+}
+
+.glass-kpi-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 50px -15px rgba(30, 44, 80, 0.35), inset 0 1px 0 var(--edge);
+}
+
 .font-mono-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: var(--mono);
   letter-spacing: -0.02em;
 }
 
 /* ========================================================================= */
-/* LUXURY 3D GLASS & TACTILE KPI DESIGN SYSTEM                                */
+/* 3D TILT WITH SPECULAR GLARE                                                */
 /* ========================================================================= */
-
-/* Glass Panel Base */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-.dark .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-/* Luxury 3D Glass KPI Card */
-.glass-kpi-3d {
+.tilt {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.5s var(--ease);
+  transform-style: preserve-3d;
   position: relative;
-  border-radius: 1rem;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 
-    0 1px 2px 0 rgba(0, 0, 0, 0.02),
-    0 4px 16px -2px rgba(15, 23, 42, 0.06),
-    0 12px 24px -4px rgba(15, 23, 42, 0.04),
-    inset 0 1px 0 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 0 0 rgba(15, 23, 42, 0.04);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
-.glass-kpi-3d::before {
-  content: '';
+.tilt.live {
+  transition: transform 0.08s linear;
+}
+
+.tilt::after {
+  content: "";
   position: absolute;
-  top: 0;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, 0.28), transparent 55%);
+  opacity: var(--gl, 0);
+  transition: opacity 0.4s;
+}
+
+.tilt > * {
+  position: relative;
+  transform: translateZ(24px);
+}
+
+/* ========================================================================= */
+/* APPLE FITNESS / WATCH STYLE SLA RINGS                                     */
+/* ========================================================================= */
+.rings {
+  display: flex;
+  gap: 16px;
+}
+
+.ring {
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--mut);
+}
+
+.ring svg {
+  width: 68px;
+  height: 68px;
+  transform: rotate(-90deg);
+  display: block;
+  margin: 0 auto 4px;
+}
+
+.ring circle {
+  fill: none;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.ring .t {
+  stroke: var(--line);
+}
+
+.ring .v {
+  stroke-dasharray: 163.4;
+  stroke-dashoffset: calc(163.4 - 163.4 * var(--p, 0));
+  transition: stroke-dashoffset 1.6s var(--ease) 0.3s;
+}
+
+.ring b {
+  display: block;
+  color: var(--txt);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+/* ========================================================================= */
+/* METRIC CARDS WITH SPARKLINES                                              */
+/* ========================================================================= */
+.k {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 150px;
+}
+
+.k small {
+  color: var(--mut);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.k .n {
+  font-size: 42px;
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--txt);
+}
+
+.k .d {
+  font-size: 12.5px;
+  color: var(--mut);
+}
+
+.k .d b {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.spk {
+  width: 100%;
+  height: 34px;
+  overflow: visible;
+  margin: 4px 0;
+}
+
+.spk path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 4px 6px color-mix(in srgb, var(--gold) 50%, transparent));
+}
+
+/* ========================================================================= */
+/* PIPELINE SLIDING STAGE FILTER                                             */
+/* ========================================================================= */
+.pipe {
+  position: relative;
+  display: flex;
+  padding: 5px;
+  border-radius: 999px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--glass);
+  border: 1px solid var(--edge);
+}
+
+.pipe::-webkit-scrollbar {
+  display: none;
+}
+
+.thumb {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
   left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--glass), var(--glass2));
+  box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.25), inset 0 1px 0 var(--edge), 0 0 0 1px var(--edge);
+  transition: transform 0.5s var(--spring), width 0.5s var(--spring);
   pointer-events: none;
 }
 
-.glass-kpi-3d:hover {
-  transform: translateY(-3px);
-  border-color: rgba(59, 130, 246, 0.35);
-  box-shadow: 
-    0 16px 32px -8px rgba(15, 23, 42, 0.12),
-    0 8px 16px -4px rgba(59, 130, 246, 0.08),
-    inset 0 1px 0 0 rgba(255, 255, 255, 1);
+.pipe button {
+  position: relative;
+  flex: 1 0 auto;
+  border: 0;
+  background: none;
+  padding: 8px 18px;
+  border-radius: 999px;
+  text-align: left;
+  color: var(--mut);
+  transition: color 0.3s var(--ease);
+  cursor: pointer;
+  z-index: 1;
 }
 
-/* Dark Mode 3D Glass KPI Card */
-.dark .glass-kpi-3d {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(2, 6, 23, 0.9) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 
-    0 4px 12px -2px rgba(0, 0, 0, 0.5),
-    0 16px 32px -6px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
-    inset 0 -1px 0 0 rgba(0, 0, 0, 0.6);
+.pipe button b {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--txt);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
 }
 
-.dark .glass-kpi-3d::before {
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+.pipe button span {
+  font-size: 11.5px;
+  white-space: nowrap;
 }
 
-.dark .glass-kpi-3d:hover {
-  transform: translateY(-3px);
-  border-color: rgba(96, 165, 250, 0.4);
-  box-shadow: 
-    0 20px 40px -10px rgba(0, 0, 0, 0.8),
-    0 0 25px -4px rgba(59, 130, 246, 0.25),
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+.pipe button[aria-pressed="true"] {
+  color: var(--txt);
 }
 
-/* Backward compatibility aliases */
-.kpi-card-3d {
-  @apply glass-kpi-3d;
+/* ========================================================================= */
+/* CHIPS & STATUS PILLS                                                      */
+/* ========================================================================= */
+.flags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.kpi-card-3d-dark {
-  @apply glass-kpi-3d;
+.chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid var(--edge);
+  background: var(--glass2);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--txt);
 }
 
-/* Ambient glow accents */
-.ambient-glow-blue {
-  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+.chip i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 10px var(--c);
 }
 
-.dark .ambient-glow-blue {
-  background: radial-gradient(circle at 50% 0%, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+.bd {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--c);
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 25%, transparent);
 }
 
-.ambient-glow-emerald {
-  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+.ok { --c: var(--ok); }
+.warn { --c: var(--warn); }
+.bad { --c: var(--bad); }
+.info { --c: var(--info); }
+.mu { --c: var(--mut); }
+
+.sla {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--c);
 }
 
-.dark .ambient-glow-emerald {
-  background: radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
+/* ========================================================================= */
+/* APPLE ROWS & TABLES                                                       */
+/* ========================================================================= */
+.row {
+  display: grid;
+  grid-template-columns: 28px 1.05fr 1.5fr 1fr .8fr 1fr 1.2fr .9fr .6fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 16px;
+  min-width: 960px;
+  cursor: pointer;
+  transition: background 0.3s var(--ease), transform 0.3s var(--ease), box-shadow 0.3s;
 }
 
-.ambient-glow-amber {
-  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+.row.hd {
+  cursor: default;
+  color: var(--mut);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 8px 16px;
 }
 
-.dark .ambient-glow-amber {
-  background: radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.25) 0%, transparent 70%);
+.row:not(.hd):hover {
+  background: var(--glass2);
+  transform: translateY(-1px) scale(1.002);
+  box-shadow: 0 10px 26px -14px rgba(0, 0, 0, 0.3), inset 0 1px 0 var(--edge);
 }
 
-.ambient-glow-purple {
-  background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+.row.sel {
+  background: var(--glass2);
+  box-shadow: inset 0 0 0 1.5px var(--gold);
 }
 
-.dark .ambient-glow-purple {
-  background: radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
+.row.chk {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent);
 }
 
-/* Tactile 3D button */
-.btn-3d {
-  box-shadow: 
-    0 1px 2px rgba(0, 0, 0, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-  transition: all 0.15s ease;
+.row.out {
+  display: none !important;
 }
 
-.btn-3d:hover {
-  transform: translateY(-1px);
-  box-shadow: 
-    0 4px 8px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+.ck {
+  appearance: none;
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  border: 1.5px solid var(--mut);
+  background: var(--glass2);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  transition: all 0.25s var(--spring);
+  margin: 0;
 }
 
-.btn-3d:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+.ck:checked {
+  background: var(--gold);
+  border-color: var(--gold);
+  transform: scale(1.08);
 }
 
-/* Custom Sleek Scrollbar */
+.ck:checked::after {
+  content: "";
+  width: 7px;
+  height: 4px;
+  border-left: 2px solid #2a1d05;
+  border-bottom: 2px solid #2a1d05;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+/* ========================================================================= */
+/* SLIDE-OVER DETAIL SHEET & TIMELINE                                        */
+/* ========================================================================= */
+.sheet {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  right: 12px;
+  width: min(440px, calc(100% - 24px));
+  z-index: 50;
+  padding: 24px;
+  overflow-y: auto;
+  transform: translateX(115%) scale(0.97);
+  opacity: 0;
+  transition: transform 0.65s var(--spring), opacity 0.4s;
+  pointer-events: none;
+}
+
+.sheet.open {
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 16, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+  z-index: 45;
+}
+
+.scrim.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.acts {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 8px 0 20px;
+}
+
+.acts button {
+  border: 1px solid var(--line);
+  background: var(--glass2);
+  border-radius: 999px;
+  padding: 8px 15px;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: transform 0.3s var(--spring), background 0.3s;
+}
+
+.acts button:hover {
+  transform: translateY(-2px);
+  background: var(--glass);
+}
+
+.acts button:active {
+  transform: scale(0.96);
+}
+
+.acts .pri {
+  background: linear-gradient(180deg, #e9cd8d, #b48a3c);
+  color: #2a1d05;
+  border-color: transparent;
+  font-weight: 650;
+  box-shadow: 0 8px 18px -8px rgba(180, 138, 60, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.acts .dng {
+  color: var(--bad);
+}
+
+.tl {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0 0 0 12px;
+  border-left: 1.5px solid var(--line);
+}
+
+.tl li {
+  position: relative;
+  padding: 0 0 16px 16px;
+  font-size: 13px;
+}
+
+.tl li::before {
+  content: "";
+  position: absolute;
+  left: -18px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 0 0 0 2px var(--mut);
+}
+
+.tl .n::before {
+  box-shadow: 0 0 0 2px var(--gold), 0 0 12px var(--gold);
+  background: var(--gold);
+}
+
+.tl .r::before {
+  box-shadow: 0 0 0 2px var(--warn);
+  background: var(--warn);
+}
+
+.tl time {
+  display: block;
+  color: var(--mut);
+  font-size: 11.5px;
+}
+
+.tl q {
+  display: block;
+  quotes: none;
+  color: var(--mut);
+  margin-top: 2px;
+}
+
+/* ========================================================================= */
+/* FLOATING BOTTOM DOCK                                                      */
+/* ========================================================================= */
+.dock {
+  position: fixed;
+  left: 50%;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px 8px 20px;
+  border-radius: 999px;
+  transform: translate(-50%, 150%);
+  opacity: 0;
+  transition: transform 0.65s var(--spring), opacity 0.4s;
+  pointer-events: none;
+}
+
+.dock.on {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dock b {
+  margin-right: 8px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  color: var(--txt);
+  font-size: 13px;
+}
+
+.dock button {
+  border: 0;
+  background: var(--glass2);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 500;
+  transition: transform 0.3s var(--spring);
+}
+
+.dock button:hover {
+  transform: translateY(-2px);
+}
+
+.dock button:active {
+  transform: scale(0.95);
+}
+
+.dock .pri {
+  background: linear-gradient(180deg, #e9cd8d, #b48a3c);
+  color: #2a1d05;
+  font-weight: 650;
+}
+
+/* ========================================================================= */
+/* COMMAND PALETTE (⌘K)                                                      */
+/* ========================================================================= */
+.pal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding: 14vh 12px 0;
+  background: rgba(5, 8, 16, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s;
+}
+
+.pal.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pbox {
+  width: min(580px, 100%);
+  padding: 8px;
+  transform: scale(0.95) translateY(-12px);
+  transition: transform 0.55s var(--spring);
+}
+
+.pal.on .pbox {
+  transform: none;
+}
+
+.pbox input {
+  width: 100%;
+  border: 0;
+  background: none;
+  outline: none;
+  font-size: 18px;
+  padding: 14px 16px;
+  letter-spacing: -0.01em;
+  color: var(--txt);
+}
+
+.pbox input::placeholder {
+  color: var(--mut);
+}
+
+.pl {
+  max-height: 46vh;
+  overflow-y: auto;
+  border-top: 1px solid var(--line);
+  padding: 6px;
+}
+
+.pi {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  color: var(--txt);
+  transition: background 0.2s;
+}
+
+.pi span {
+  color: var(--mut);
+  font-size: 12px;
+  text-align: right;
+}
+
+.pi.on {
+  background: var(--glass2);
+  box-shadow: inset 0 0 0 1px var(--edge);
+}
+
+/* ========================================================================= */
+/* 3D iPHONE STAGE & JOB CARDS                                               */
+/* ========================================================================= */
+.stage {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 30px 10px;
+  perspective: 1600px;
+}
+
+.phone {
+  width: 320px;
+  padding: 18px;
+  border-radius: 44px;
+  transform: rotateY(-14deg) rotateX(5deg) rotateZ(1deg);
+  transition: transform 1.1s var(--ease);
+  box-shadow: -30px 40px 70px -30px rgba(0, 0, 0, 0.55), inset 0 1px 0 var(--edge);
+}
+
+.phone:hover {
+  transform: none;
+}
+
+.phone h3 {
+  margin: 6px 6px 12px;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  font-weight: 650;
+}
+
+.mt {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mt div {
+  background: var(--glass2);
+  border-radius: 18px;
+  padding: 12px;
+  border: 1px solid var(--line);
+}
+
+.mt b {
+  font-size: 22px;
+  display: block;
+  font-weight: 650;
+  color: var(--txt);
+}
+
+.mt span {
+  font-size: 11.5px;
+  color: var(--mut);
+}
+
+.job {
+  background: var(--glass2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.job div.r {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.job p {
+  margin: 7px 0 11px;
+  font-size: 12.5px;
+  color: var(--mut);
+}
+
+.side-note {
+  max-width: 300px;
+  color: var(--mut);
+}
+
+.side-note h2 {
+  color: var(--txt);
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+  font-weight: 650;
+}
+
+/* ========================================================================= */
+/* SCROLLBAR & SELECTION                                                     */
+/* ========================================================================= */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -180,16 +854,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: color-mix(in srgb, var(--mut) 35%, transparent);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.6);
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.5);
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.8);
+  background: color-mix(in srgb, var(--mut) 60%, transparent);
 }
