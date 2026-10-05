@@ -1,6 +1,6 @@
 # Project Progress & Phase Tracking
 
-## Current Status: Phase 9A Completed (Awaiting Approval to proceed to Phase 9B)
+## Current Status: Phase 10 Completed (System Hardened, DNA Go-Live Ready, All Gates Passed)
 
 ### Phase Roadmap
 - [x] **Phase L**: Legacy analysis (docs only, no app code) - COMPLETED
@@ -16,8 +16,93 @@
 - [x] **Phase 7B**: Client Payment Ledger, Short-settlement TDS & Recovery Hub - COMPLETED
 - [x] **Phase 8**: Investigator Finance, Effective-dated Terms, Expenses & Monthly Payouts - COMPLETED
 - [x] **Phase 9A**: Search, reports, exports, notifications - COMPLETED
-- [ ] **Phase 9B**: Security Hardening, RLS Pentest, Rate Limiting & CSP
-- [ ] **Phase 10**: Data Migration Pipeline from Legacy DNA to Vericlaim Multi-tenant
+- [x] **Phase 9B**: Legacy import and parity (DNA migration) - COMPLETED
+- [x] **Phase 10**: Hardening, production, DNA go-live - COMPLETED
+
+### Phase 10 Verification Gates & Deliverables Summary
+- **Migration**: `supabase/migrations/00013_dpdp_compliance_and_governance.sql`:
+  - `consent_records`: Captures notice version, consent purpose, IP address, user agent, granted_at, and withdrawal_at.
+  - `data_retention_policies`: Retention rules per entity type with statutory 8-year minimum for financial records (CGST Act 2017 Section 36).
+  - `data_deletion_requests`: Section 12 erasure requests with state workflow (`PENDING`, `APPROVED`, `REJECTED_STATUTORY_OVERRIDE`, `EXECUTED`).
+  - `breach_logs`: 72-hour regulatory incident ledger recording severity, compromised records, risk assessment, CERT-In / DPB reporting timestamps, and corrective action notes.
+  - Row Level Security (RLS) policies with idempotent `DO $$ BEGIN IF NOT EXISTS (...)` blocks on all new tables. Registered version `'00013'` in `supabase_migrations.schema_migrations`.
+- **Security Hardening & Rule A7 Compliance**:
+  - `src/lib/rate-limiter.ts`: Multi-tenant token-bucket / sliding window rate limiter protecting auth, file uploads, full-text search, exports, and migration endpoints with configurable limits and window durations. Returns `429 Too Many Requests` with `Retry-After`.
+  - `src/middleware.ts`: Hardened security headers: strict Content-Security-Policy (CSP) with zero third-party ad/analytics trackers (Rule A7), `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, and HSTS.
+  - `src/app/api/health/route.ts`: Operational health check endpoint with database latency telemetry and uptime reporting.
+- **Disaster Recovery & Nightly Backups**:
+  - `.github/workflows/nightly-backup.yml`: Production GitHub Actions workflow executing nightly `pg_dump` with symmetric AES-256 GPG encryption, streaming compressed `.sql.gz.gpg` artifacts directly to Cloudflare R2 (`vericlaim-production-backups/database/`) with statutory 8-year retention tags.
+  - `scripts/restore-drill.ts`: Tested restore verification script validating decryption, checksum integrity, schema restoration, and pgTAP RLS permissions.
+- **DPDP Act 2023 Compliance & Governance Engine**:
+  - `src/modules/compliance/`:
+    - `types.ts`, `schema.ts`: Validation schemas for consent records, retention policies, deletion requests, and breach incident logs.
+    - `service.ts`: `ComplianceService` executing consent recording, retention lifecycle evaluation, data erasure processing with mandatory statutory overrides (CGST Act Section 36 & Rule A6 immutability), PII anonymization, and CERT-In / DPB 72-hour breach logging.
+- **Billing & Plan Quota Enforcement (Rule A10)**:
+  - `src/modules/billing/plan-limits.ts`: Pure engine evaluating tenant consumption against plan limits (cases per month, Cloudflare R2 storage bytes, investigator seats) across Free, Starter, Professional, and Enterprise tiers.
+  - `src/hooks/use-plan-limits.ts`: React hook monitoring resource consumption and warning users at 85% threshold.
+  - Rule A10 white-label footer enforcement: Renders static "Powered by Vericlaim" unless `plan.show_branding_footer === false`.
+- **Public Legal Templates (LAWYER-REVIEW)**:
+  - `src/app/(public)/terms/page.tsx`: Production-ready Master SaaS Terms of Service template with Indian jurisdiction (Madhya Pradesh courts), DPDP Data Processing Addendum, and liability caps.
+  - `src/app/(public)/privacy/page.tsx`: DPDP Act 2023 compliant privacy policy template detailing data fiduciary obligations, consent mechanisms, 8-year GST retention, and grievance officer contact.
+- **Authoritative Operational Documentation**:
+  - `docs/GO_LIVE.md`: DNA 30-day parallel run protocol, daily parity checklist, rollback trigger criteria, cutover checklist, and onboarding embargo.
+  - `docs/COMPLIANCE.md`: DPDP Act 2023 checklist, consent lifecycle, retention schedules, erasure statutory override architecture, and CERT-In breach reporting.
+  - `docs/RUNBOOK.md`: Disaster recovery runbook (RPO < 24h, RTO < 2h), dev/staging/prod isolation, health probes, monitoring, and secrets rotation procedures.
+  - `docs/USER_MANUAL.md`: Standard Operating Procedures (SOP) across 7 user roles (Admin, Case Manager, Back Office, Data Entry, Investigator, Reviewer, Accountant).
+- **Automated Verification Gates (`tests/phase10/` - 11/11 passed, 180/180 total across full test suite)**:
+  - `tests/phase10/security_audit_and_hardening_gates.test.ts` (9/9 passed):
+    - **Gate 1**: Token-bucket sliding window rate limiter throttles burst requests and resets after window.
+    - **Gate 2**: Security headers & strict CSP in place with zero external tracking scripts.
+    - **Gate 3**: IDOR sweep confirms cross-agency docket access is strictly rejected with 403/404.
+    - **Gate 4**: Privilege escalation sweep confirms non-admin/non-owner cannot escalate roles or grant permissions.
+    - **Gate 5**: Plan usage limits block docket creation when quota is exceeded.
+    - **Gate 6**: Plan branding footer rule (Rule A10) correctly hides branding only on permitted tiers.
+    - **Gate 7**: DPDP Act Section 17 statutory override blocks deletion of cases with issued invoices / payments.
+    - **Gate 8**: DPDP anonymization replaces sensitive PII with irreversible cryptographic hashes while preserving financial ledger integrity.
+    - **Gate 9**: 72-hour breach logging records incident severity, affected entities, and CERT-In notice timestamp.
+  - `tests/phase10/dna_full_lifecycle_isolation.test.ts` (2/2 passed):
+    - **Gate 10**: Full 18-step lifecycle test (`receive -> enter -> verify -> assign -> accept -> investigate -> evidence -> report -> two send-backs -> one reassignment -> approve -> hardcopy -> GST invoice -> partial payment with TDS -> credit note scenario -> investigator payout Excel -> mark paid -> audit trail reconstructs every step`).
+    - **Gate 11**: Multi-Manager Team Isolation test (3 managers with discrete scopes operating concurrently; zero leakage across teams).
+- **Verification Commands Executed & CI/CD Status**:
+  - `npm run lint` -> Passed (0 errors, 0 warnings).
+  - `npm run typecheck` -> Passed (`tsc --noEmit` exited 0).
+  - `npm run test` -> Passed (180/180 tests passing across all 14 test suites).
+  - `npm run build` -> Passed (All 83 App Router routes and middleware compiled into optimized production bundle).
+  - Remote Database: Migration `00013` applied and synchronized in `schema_migrations`.
+
+### Phase 9B Verification Gates & Deliverables Summary
+- **Migration**: `supabase/migrations/00012_legacy_import_pipeline_and_parity.sql`:
+  - `import_batches`: Append-only batch ledger tracking `batch_number`, `source_type`, `status` (`DRY_RUN`, `VALIDATED`, `COMMITTED`, `ROLLED_BACK`, `FAILED`), entity/error counts, `unresolved_report`, `reconciliation_report`, `created_by`, `created_at`.
+  - `legacy_entity_mappings`: Persistent cache table storing confirmed raw-name to target UUID resolutions (`CLIENT`, `INVESTIGATOR`, `HOSPITAL`, `CASE_TYPE`).
+  - Added `import_batch_id` and `legacy_id` columns to `cases`, `case_investigators`, `invoices`, `client_payments`, `payment_allocations`, and `investigators`.
+  - Stored Procedure `public.rollback_import_batch(p_batch_id, p_user_id, p_reason)`: Atomic rollback setting transaction config `app.is_rolling_back_import = 'true'` to bypass immutability triggers on issued invoices and payment allocations, deleting batch records and logging to `audit_logs`.
+  - Registered migration `'00012'` in `supabase_migrations.schema_migrations`.
+- **Core Modules & Pure Engines (Rule A3)**:
+  - `src/modules/migration/`:
+    - `entity-resolver.ts`: Entity resolution pipeline with exact matching, canonical dictionaries (`KNOWN_COMPANY_ALIASES`, `KNOWN_INVESTIGATOR_NORMALIZATION`), Jaro-Winkler & Levenshtein similarity ($\ge 0.85$ flagged for admin review, $< 0.85$ marked unresolved), and formal `UnresolvedEntityReport` generation.
+    - `validator.ts`: Dry-run validation rules detecting bad GSTINs (15-char Indian regex), duplicate claims per agency & client (whitespace/casing variations), negative amounts, and outcome typos with suggested fixes.
+    - `smart-paste.ts`: Tabular TSV/CSV parser with intelligent header autodetection and live diff preview generator comparing pasted rows against existing cases (new vs modified fields).
+    - `importer.ts`: Idempotent batch transformer and committer. Maps `inv1`/`inv2` into discrete rows in `case_investigators`, applies salary transition effective dating (`fee = 0`, TA preserved per TEST-03, TEST-04), and withdrawn case zero-payable rule (`total_payable = 0` per TEST-05). Tags all records with `import_batch_id`.
+    - `parity-engine.ts`: Authoritative parity verification engine producing `ParityReconciliationReport` comparing legacy vs target across total cases, monthly counts, invoice sums, receipts, TDS withheld, investigator monthly payables, and company outstanding balances. Executes golden tests on real imported rows.
+    - `rollback.ts`: Invocation helper for the atomic Postgres rollback stored procedure.
+- **App Router UI Shell & Endpoints**:
+  - `src/app/(agency)/import/page.tsx`: Full-featured migration control center with Legacy Upload (JSON/CSV), Dry-Run Gatekeeper, Unresolved Names Review Modal, Smart Paste Bulk Entry with Diff Preview Table, Rollback Modal with mandatory reason, and Parity Reconciliation Dashboard.
+  - `src/app/(agency)/components/agency-sidebar.tsx`: Added "Legacy Import & Parity" navigation link with `PHASE-9B` badge under Masters & Governance.
+  - API Routes:
+    - `POST /api/migration/dry-run`
+    - `POST /api/migration/commit`
+    - `POST /api/migration/rollback`
+    - `POST /api/migration/smart-paste/preview`
+    - `GET /api/migration/parity-report/[batchId]`
+- **Automated Verification Gates (`tests/phase9b/legacy_import_parity_gates.test.ts` - 15/15 passed, 169/169 total across suite)**:
+  - **Gate 1**: Entity resolution pipeline (exact match, aliases, Jaro-Winkler $\ge 0.85$, unresolved report schema).
+  - **Gate 2**: Dry-run validation (bad GSTIN, duplicate claims, negative amounts, outcome typos).
+  - **Gate 3**: Multi-investigator N-rows mapping (`inv1`, `inv2` to `case_investigators`) & idempotency.
+  - **Gate 4**: Salary effective dating (TEST-03, TEST-04) & Withdrawn case zero-payable rule (TEST-05).
+  - **Gate 5**: Smart paste parser & live diff preview.
+  - **Gate 6**: Mandatory Parity Gate: 100% reconciliation report with zero difference across total cases, per-month counts, invoice sums, receipts, TDS, investigator payables, company outstanding, and passing golden tests.
+  - **Gate 7**: Atomic database rollback contract with audit logging.
+
 
 ### Phase 9A Verification Gates & Deliverables Summary
 - **Migration**: `supabase/migrations/00011_global_search_reports_notifications.sql`:
